@@ -1,42 +1,50 @@
-import React from 'react';
+import React from 'react'; 
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell,
-  LineChart, Line, AreaChart, Area
+  PieChart, Pie, Cell
 } from 'recharts';
 import { 
-  FiUsers, FiWifi, FiPhone, FiActivity, FiAlertCircle, FiCheckCircle 
+  FiWifi, FiAlertCircle, FiCheckCircle, FiUser, FiTool 
 } from 'react-icons/fi';
-import { Card, Row, Col, Container } from 'react-bootstrap';
+import { Card, Row, Col, Container, Table, Badge } from 'react-bootstrap';
 
-// Sample data for charts (same as before)
-const monthlyData = [
-  { name: 'Jan', incidents: 4000, resolved: 2400, newCustomers: 2400 },
-  { name: 'Feb', incidents: 3000, resolved: 1398, newCustomers: 2210 },
-  { name: 'Mar', incidents: 2000, resolved: 9800, newCustomers: 2290 },
-  { name: 'Apr', incidents: 2780, resolved: 3908, newCustomers: 2000 },
-  { name: 'May', incidents: 1890, resolved: 4800, newCustomers: 2181 },
-  { name: 'Jun', incidents: 2390, resolved: 3800, newCustomers: 2500 },
-  { name: 'Jul', incidents: 3490, resolved: 4300, newCustomers: 2100 },
+// Sample data for mobile sites
+const mobileSitesData = [
+  { name: 'Jan', active: 120, down: 5 },
+  { name: 'Feb', active: 125, down: 3 },
+  { name: 'Mar', active: 130, down: 8 },
+  { name: 'Apr', active: 135, down: 2 },
+  { name: 'May', active: 140, down: 6 },
+  { name: 'Jun', active: 145, down: 4 },
+  { name: 'Jul', active: 150, down: 1 },
 ];
 
-const serviceDistribution = [
-  { name: 'Mobile', value: 400 },
-  { name: 'Internet', value: 300 },
-  { name: 'Landline', value: 300 },
-  { name: 'TV', value: 200 },
+const siteStatusData = [
+  { name: 'Active', value: 145 },
+  { name: 'Down', value: 5 },
 ];
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = ['#4ADE80', '#F87171'];
 
-const performanceData = [
-  { name: 'Jan', responseTime: 2.5, satisfaction: 4.2 },
-  { name: 'Feb', responseTime: 2.3, satisfaction: 4.3 },
-  { name: 'Mar', responseTime: 2.0, satisfaction: 4.5 },
-  { name: 'Apr', responseTime: 1.8, satisfaction: 4.6 },
-  { name: 'May', responseTime: 1.5, satisfaction: 4.7 },
-  { name: 'Jun', responseTime: 1.4, satisfaction: 4.8 },
-  { name: 'Jul', responseTime: 1.2, satisfaction: 4.9 },
+// Sample alerts data
+const recentAlerts = [
+  { id: 1, site: 'Site A', type: 'Power Failure', status: 'Critical', time: '10 min ago' },
+  { id: 2, site: 'Site B', type: 'Connectivity Loss', status: 'Warning', time: '25 min ago' },
+  { id: 3, site: 'Site C', type: 'Hardware Fault', status: 'Critical', time: '1 hour ago' },
+  { id: 4, site: 'Site D', type: 'Maintenance', status: 'Info', time: '2 hours ago' },
+];
+
+// Sample managers and technicians
+const managers = [
+  { id: 1, name: 'Mohamed Ali', email: 'm.ali@example.com', sites: 12 },
+  { id: 2, name: 'Fatma Ben Salah', email: 'f.bensalah@example.com', sites: 8 },
+  { id: 3, name: 'Ahmed Khemiri', email: 'a.khemiri@example.com', sites: 15 },
+];
+
+const technicians = [
+  { id: 1, name: 'Samir Trabelsi', email: 's.trabelsi@example.com', skills: '5G, Fiber' },
+  { id: 2, name: 'Leila Boukadi', email: 'l.boukadi@example.com', skills: 'Microwave, Power' },
+  { id: 3, name: 'Karim Hammami', email: 'k.hammami@example.com', skills: 'Antennas, RF' },
 ];
 
 const Dashboard: React.FC = () => {
@@ -48,37 +56,37 @@ const Dashboard: React.FC = () => {
       <Row className="mb-4">
         <Col md={6} lg={3} className="mb-3 mb-lg-0">
           <StatCard 
-            icon={<FiUsers className="text-primary" size={24} />}
-            title="Total Customers"
-            value="1,248"
-            change="+12%"
-            isPositive={true}
-          />
-        </Col>
-        <Col md={6} lg={3} className="mb-3 mb-lg-0">
-          <StatCard 
-            icon={<FiWifi className="text-success" size={24} />}
-            title="Active Services"
-            value="3,742"
+            icon={<FiWifi className="text-primary" size={24} />}
+            title="Total Mobile Sites"
+            value="150"
             change="+5%"
             isPositive={true}
           />
         </Col>
         <Col md={6} lg={3} className="mb-3 mb-lg-0">
           <StatCard 
-            icon={<FiActivity className="text-warning" size={24} />}
-            title="Network Incidents"
-            value="48"
-            change="-8%"
+            icon={<FiCheckCircle className="text-success" size={24} />}
+            title="Active Sites"
+            value="145"
+            change="+3%"
+            isPositive={true}
+          />
+        </Col>
+        <Col md={6} lg={3} className="mb-3 mb-lg-0">
+          <StatCard 
+            icon={<FiAlertCircle className="text-warning" size={24} />}
+            title="Sites Down"
+            value="5"
+            change="-2%"
             isPositive={false}
           />
         </Col>
         <Col md={6} lg={3}>
           <StatCard 
-            icon={<FiPhone className="text-info" size={24} />}
-            title="Support Tickets"
-            value="126"
-            change="+3%"
+            icon={<FiAlertCircle className="text-danger" size={24} />}
+            title="Critical Alerts"
+            value="2"
+            change="+1"
             isPositive={false}
           />
         </Col>
@@ -86,35 +94,35 @@ const Dashboard: React.FC = () => {
 
       {/* Main Charts Row */}
       <Row className="mb-4">
-        <Col lg={4} className="mb-3 mb-lg-0">
+        <Col lg={6} className="mb-3 mb-lg-0">
           <Card>
             <Card.Body>
-              <Card.Title>Monthly Incidents & Resolutions</Card.Title>
+              <Card.Title>Mobile Sites Status</Card.Title>
               <div style={{ height: '300px' }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={monthlyData}>
+                  <BarChart data={mobileSitesData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="incidents" fill="#F87171" name="Incidents" />
-                    <Bar dataKey="resolved" fill="#4ADE80" name="Resolved" />
+                    <Bar dataKey="active" fill="#4ADE80" name="Active Sites" />
+                    <Bar dataKey="down" fill="#F87171" name="Down Sites" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </Card.Body>
           </Card>
         </Col>
-        <Col lg={4} className="mb-3 mb-lg-0">
+        <Col lg={6}>
           <Card>
             <Card.Body>
-              <Card.Title>Service Distribution</Card.Title>
+              <Card.Title>Sites Status Distribution</Card.Title>
               <div style={{ height: '300px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={serviceDistribution}
+                      data={siteStatusData}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
@@ -123,7 +131,7 @@ const Dashboard: React.FC = () => {
                       dataKey="value"
                       label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                     >
-                      {serviceDistribution.map((entry, index) => (
+                      {siteStatusData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -134,80 +142,93 @@ const Dashboard: React.FC = () => {
             </Card.Body>
           </Card>
         </Col>
-        <Col lg={4}>
-          <Card>
-            <Card.Body>
-              <Card.Title>Performance Metrics</Card.Title>
-              <div style={{ height: '300px' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={performanceData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis yAxisId="left" />
-                    <YAxis yAxisId="right" orientation="right" />
-                    <Tooltip />
-                    <Legend />
-                    <Line yAxisId="left" type="monotone" dataKey="responseTime" stroke="#8884d8" name="Response Time (hrs)" />
-                    <Line yAxisId="right" type="monotone" dataKey="satisfaction" stroke="#82ca9d" name="Satisfaction (1-5)" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
       </Row>
 
       {/* Bottom Row */}
       <Row>
-        <Col lg={6} className="mb-3 mb-lg-0">
+        <Col lg={4} className="mb-3 mb-lg-0">
           <Card>
             <Card.Body>
-              <Card.Title>Recent Activity</Card.Title>
-              <div className="activity-feed">
-                <ActivityItem 
-                  icon={<FiCheckCircle className="text-success" />}
-                  title="Network upgrade completed"
-                  time="2 hours ago"
-                  description="Zone 4 network infrastructure upgraded to 5G"
-                />
-                <ActivityItem 
-                  icon={<FiAlertCircle className="text-warning" />}
-                  title="Service interruption"
-                  time="5 hours ago"
-                  description="Reported outage in downtown area"
-                />
-                <ActivityItem 
-                  icon={<FiCheckCircle className="text-success" />}
-                  title="Maintenance scheduled"
-                  time="1 day ago"
-                  description="Planned maintenance for tomorrow night"
-                />
-                <ActivityItem 
-                  icon={<FiCheckCircle className="text-success" />}
-                  title="New customer portal"
-                  time="2 days ago"
-                  description="Launched new self-service customer portal"
-                />
-              </div>
+              <Card.Title>Recent Alerts</Card.Title>
+              <Table striped hover size="sm">
+                <thead>
+                  <tr>
+                    <th>Site</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentAlerts.map(alert => (
+                    <tr key={alert.id}>
+                      <td>{alert.site}</td>
+                      <td>{alert.type}</td>
+                      <td>
+                        <Badge 
+                          bg={
+                            alert.status === 'Critical' ? 'danger' : 
+                            alert.status === 'Warning' ? 'warning' : 'info'
+                          }
+                        >
+                          {alert.status}
+                        </Badge>
+                      </td>
+                      <td>{alert.time}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
             </Card.Body>
           </Card>
         </Col>
-        <Col lg={6}>
+        <Col lg={4} className="mb-3 mb-lg-0">
           <Card>
             <Card.Body>
-              <Card.Title>Network Status</Card.Title>
-              <div style={{ height: '300px' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Area type="monotone" dataKey="newCustomers" stackId="1" stroke="#8884d8" fill="#8884d8" name="New Customers" />
-                    <Area type="monotone" dataKey="resolved" stackId="2" stroke="#82ca9d" fill="#82ca9d" name="Resolved Issues" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
+              <Card.Title>Gestionnaires</Card.Title>
+              <Table striped hover size="sm">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Sites</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {managers.map(manager => (
+                    <tr key={manager.id}>
+                      <td>{manager.name}</td>
+                      <td>{manager.email}</td>
+                      <td>{manager.sites}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col lg={4}>
+          <Card>
+            <Card.Body>
+              <Card.Title>Techniciens</Card.Title>
+              <Table striped hover size="sm">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Skills</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {technicians.map(tech => (
+                    <tr key={tech.id}>
+                      <td>{tech.name}</td>
+                      <td>{tech.email}</td>
+                      <td>{tech.skills}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
             </Card.Body>
           </Card>
         </Col>
@@ -243,31 +264,6 @@ const StatCard: React.FC<StatCardProps> = ({ icon, title, value, change, isPosit
         </p>
       </Card.Body>
     </Card>
-  );
-};
-
-// Activity Item Component with Bootstrap
-interface ActivityItemProps {
-  icon: React.ReactNode;
-  title: string;
-  time: string;
-  description: string;
-}
-
-const ActivityItem: React.FC<ActivityItemProps> = ({ icon, title, time, description }) => {
-  return (
-    <div className="d-flex mb-3">
-      <div className="me-3 mt-1">
-        {icon}
-      </div>
-      <div>
-        <div className="d-flex align-items-center">
-          <h6 className="mb-0 me-2">{title}</h6>
-          <small className="text-muted">{time}</small>
-        </div>
-        <p className="text-muted mb-0"><small>{description}</small></p>
-      </div>
-    </div>
   );
 };
 

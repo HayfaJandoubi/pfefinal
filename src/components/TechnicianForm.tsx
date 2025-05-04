@@ -1,10 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import Swal from "sweetalert2";
 import axios from "axios";
 import { addTechnician } from "../services/technicianService";
 
-const TechnicianForm = () => {
-  const [formData, setFormData] = useState({
+interface Manager {
+  id: string;
+  fullName: string;
+  region: string;
+}
+
+interface TechnicianFormData {
+  fullName: string;
+  email: string;
+  phone: string;
+  region: string;
+  managerId: string;
+  password: string;
+}
+
+const TechnicianForm: React.FC = () => {
+  const [formData, setFormData] = useState<TechnicianFormData>({
     fullName: "",
     email: "",
     phone: "",
@@ -14,7 +29,7 @@ const TechnicianForm = () => {
   });
 
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [managers, setManagers] = useState([]);
+  const [managers, setManagers] = useState<Manager[]>([]);
   const [passwordError, setPasswordError] = useState("");
 
   const tunisianRegions = [
@@ -26,7 +41,7 @@ const TechnicianForm = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/managers")
+      .get<Manager[]>("http://localhost:5000/api/managers")
       .then((res) => setManagers(res.data))
       .catch((err) => console.error("Erreur managers:", err));
   }, []);
@@ -41,7 +56,7 @@ const TechnicianForm = () => {
     }
   }, [formData.region, managers]);
 
-  const handleChange = (e: { target: { name: any; value: any; }; }) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
     if (name === "fullName") {
@@ -56,7 +71,7 @@ const TechnicianForm = () => {
     }
   };
 
-  const handleConfirmPasswordChange = (e) => {
+  const handleConfirmPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setConfirmPassword(value);
     if (formData.password && value !== formData.password) {
@@ -66,7 +81,7 @@ const TechnicianForm = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (formData.password !== confirmPassword) {
       setPasswordError("⚠️Les mots de passe ne correspondent pas.");
@@ -133,6 +148,7 @@ const TechnicianForm = () => {
         </div>
         <div className="card-body">
           <form onSubmit={handleSubmit}>
+            {/* Full Name */}
             <div className="mb-3">
               <label className="form-label">Nom complet</label>
               <input
@@ -145,6 +161,7 @@ const TechnicianForm = () => {
               />
             </div>
 
+            {/* Email */}
             <div className="mb-3">
               <label className="form-label">Email</label>
               <input
@@ -157,6 +174,7 @@ const TechnicianForm = () => {
               />
             </div>
 
+            {/* Phone */}
             <div className="mb-3">
               <label className="form-label">Téléphone</label>
               <input
@@ -169,6 +187,7 @@ const TechnicianForm = () => {
               />
             </div>
 
+            {/* Region */}
             <div className="mb-3">
               <label className="form-label">Région</label>
               <select
@@ -187,6 +206,7 @@ const TechnicianForm = () => {
               </select>
             </div>
 
+            {/* Manager (readonly) */}
             <div className="mb-3">
               <label className="form-label">Gestionnaire</label>
               <input
@@ -200,6 +220,7 @@ const TechnicianForm = () => {
               />
             </div>
 
+            {/* Password */}
             <div className="mb-3">
               <label className="form-label">Mot de passe</label>
               <input
@@ -212,6 +233,7 @@ const TechnicianForm = () => {
               />
             </div>
 
+            {/* Confirm Password */}
             <div className="mb-3">
               <label className="form-label">Confirmer le mot de passe</label>
               <input

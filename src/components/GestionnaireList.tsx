@@ -9,6 +9,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
+
 type Manager = {
   id: number;
   fullName: string;
@@ -35,16 +36,13 @@ const data: Manager[] = [
 ];
 
 const GestionnaireList = () => {
-  const columns = useMemo<MRT_ColumnDef<Manager>[]>(
-    () => [
-      { accessorKey: "id", header: "ID", size: 50 },
-      { accessorKey: "fullName", header: "Nom Complet", size: 150 },
-      { accessorKey: "email", header: "Email", size: 200 },
-      { accessorKey: "phone", header: "Téléphone", size: 120 },
-      { accessorKey: "region", header: "Région", size: 100 },
-    ],
-    []
-  );
+  const columns = useMemo<MRT_ColumnDef<Manager>[]>(() => [
+    { accessorKey: "id", header: "ID", size: 50 },
+    { accessorKey: "fullName", header: "Nom Complet", size: 150 },
+    { accessorKey: "email", header: "Email", size: 200 },
+    { accessorKey: "phone", header: "Téléphone", size: 120 },
+    { accessorKey: "region", header: "Région", size: 100 },
+  ], []);
 
   const table = useMaterialReactTable({
     columns,
@@ -54,7 +52,7 @@ const GestionnaireList = () => {
   const navigate = useNavigate();
 
   const handleAddManager = () => {
-    navigate("/gestionnaireform");
+    navigate("/ajouter-gestionnaire");
   };
 
   const handleExportExcel = () => {
@@ -74,12 +72,9 @@ const GestionnaireList = () => {
 
   return (
     <div className="container mt-4">
-      {/* Header with title and buttons */}
-      <div className="d-flex justify-content-between align-items-start mb-3">
-        <div className="w-100 text-center">
-          <h2 className="text-primary">Liste des gestionnaires</h2>
-        </div>
-        <div className="position-absolute end-0 me-4">
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h2 className="text-primary">Liste des gestionnaires</h2>
+        <div>
           <button className="btn btn-primary me-2" onClick={handleAddManager}>
             Ajouter un gestionnaire
           </button>
@@ -88,8 +83,6 @@ const GestionnaireList = () => {
           </button>
         </div>
       </div>
-
-      {/* Table */}
       <MaterialReactTable table={table} />
     </div>
   );
