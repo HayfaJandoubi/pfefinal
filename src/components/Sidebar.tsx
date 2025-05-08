@@ -10,10 +10,8 @@ const Sidebar: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Clear authentication
-    localStorage.removeItem('authToken'); // Remove token if stored
-    sessionStorage.removeItem('authToken'); // Or from sessionStorage
-    // Redirect to login page
+    localStorage.removeItem('authToken'); 
+    sessionStorage.removeItem('authToken'); 
     navigate('/login');
   };
 
@@ -22,7 +20,6 @@ const Sidebar: React.FC = () => {
       className="bg-primary text-white d-flex flex-column h-100 p-3"
       style={{ position: 'fixed', width: '280px', top: 0, left: 0, bottom: 0 }}
     >
-      {/* Logo and Company Name */}
       <div className="d-flex align-items-center mb-4">
       <img src={logo}
           alt="Tunisie Telecom" 
@@ -38,6 +35,12 @@ const Sidebar: React.FC = () => {
           <Link to="/dashboard" className="nav-link text-white d-flex align-items-center py-2">
             <MdDashboard className="me-3" size={20} />
             Dashboard
+          </Link>
+        </Nav.Item>
+        <Nav.Item>
+          <Link to="/gestionnaireform" className="nav-link text-white d-flex align-items-center py-2">
+            <MdEngineering className="me-3" size={20} />
+            Ajouter Utilisateur
           </Link>
         </Nav.Item>
         <Nav.Item>

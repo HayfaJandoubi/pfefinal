@@ -52,7 +52,7 @@ const GestionnaireList = () => {
   const navigate = useNavigate();
 
   const handleAddManager = () => {
-    navigate("/ajouter-gestionnaire");
+    navigate("/gestionnaireform");
   };
 
   const handleExportExcel = () => {

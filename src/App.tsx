@@ -8,6 +8,8 @@ import TechnicianForm from './components/TechnicianForm';
 import GestionnaireForm from './components/GestionnaireForm';
 import SiteEnAttente from './components/SiteEnAttente';
 import LoginPage from './components/LoginPage';
+import DashboardGest from "./components/DashboardGest";
+import AjoutSite from './components/AjoutSite';
 import React from "react";
 
 // A wrapper to conditionally show layout
@@ -33,6 +35,8 @@ const AppContent = () => {
             <Route path="/technicienform" element={<TechnicianForm />} />
             <Route path="/gestionnaireform" element={<GestionnaireForm />} />
             <Route path="/sitesenattente" element={<SiteEnAttente />} />
+            <Route path="/dashboardgest" element={<DashboardGest />} />
+            <Route path="/ajoutsite" element={<AjoutSite />} />
           </Routes>
         </Layout>
       )}
