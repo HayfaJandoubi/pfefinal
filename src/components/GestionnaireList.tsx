@@ -78,13 +78,13 @@ const GestionnaireList = () => {
   const table = useMaterialReactTable({
     columns,
     data: gestionnaires,
-    enableRowSelection: false, // optional feature
+    enableRowSelection: false, 
     enableColumnFilters: true,
     enablePagination: true,
   });
 
   const handleExportExcel = () => {
-    const exportData = gestionnaires.map(({ role, ...rest }) => rest); // remove role
+    const exportData = gestionnaires.map(({ role, ...rest }) => rest); 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Gestionnaires");

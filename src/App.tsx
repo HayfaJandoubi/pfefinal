@@ -9,6 +9,7 @@ import GestionnaireForm from './components/GestionnaireForm';
 import SiteEnAttente from './components/SiteEnAttente';
 import LoginPage from './components/LoginPage';
 import DashboardGest from "./components/DashboardGest";
+import DashboardTech from "./components/DashboardTech";
 import AjoutSite from './components/AjoutSite';
 import React from "react";
 
@@ -36,6 +37,7 @@ const AppContent = () => {
             <Route path="/gestionnaireform" element={<GestionnaireForm />} />
             <Route path="/sitesenattente" element={<SiteEnAttente />} />
             <Route path="/dashboardgest" element={<DashboardGest />} />
+            <Route path="/dashboardtech" element={<DashboardTech />} />
             <Route path="/ajoutsite" element={<AjoutSite />} />
           </Routes>
         </Layout>

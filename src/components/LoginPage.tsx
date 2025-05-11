@@ -65,8 +65,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         borderRadius: '15px',
         boxShadow: '0 10px 30px rgba(0, 51, 102, 0.3)',
         overflow: 'hidden',
+        width: '100%',
         maxWidth: '1000px',
-        width: '100%'
+        height: '100%' // Ensure container takes full height
       }}>
         {/* Login Form Side */}
         <div style={{ flex: 1, minWidth: '300px' }}>
@@ -248,7 +249,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           minWidth: '300px',
           backgroundImage: `url('https://www.tunisietelecom.tn/sites/default/files/styles/actualite_image/public/2021-11/tt-agence.jpg')`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center'
+          backgroundPosition: 'center',
+          height: '100%' 
         }}></div>
       </div>
     </div>

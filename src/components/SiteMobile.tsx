@@ -11,65 +11,88 @@ import { saveAs } from "file-saver";
 
 // Data type
 type SiteMobile = {
-  numero: string;
   adresse: string;
   coordonnees: string;
   equipement: string;
   technologie: string;
   type: string;
+  acces: string;
+  numero?: number; 
 };
 
-// Sample data
-const data: SiteMobile[] = [
+
+const originalData: SiteMobile[] = [
   {
-    numero: "001",
     adresse: "Rue Habib Bourguiba",
     coordonnees: "36.8065, 10.1815",
-    equipement: "Antenne 4G",
-    technologie: "LTE",
-    type: "Urbain",
+    equipement: "alcatel",
+    technologie: "4G",
+    type: "Outdoor",
+    acces: "autorisé",
   },
   {
-    numero: "002",
     adresse: "Avenue de la Liberté",
     coordonnees: "36.8000, 10.1700",
-    equipement: "Routeur 5G",
+    equipement: "Ericsson",
     technologie: "5G",
-    type: "Suburbain",
+    type: "indoor",
+    acces: "non autorisé",
   },
   {
-    numero: "003",
     adresse: "Rue de Marseille",
     coordonnees: "36.8145, 10.1650",
-    equipement: "BTS 3G",
-    technologie: "UMTS",
-    type: "Rural",
+    equipement: "hwauei",
+    technologie: "3G",
+    type: "outdoor",
+    acces: "autorisé",
   },
 ];
+
+const dataWithIndex = originalData.map((item, index) => ({
+  ...item,
+  numero: index + 1,
+}));
 
 const SiteMobile = () => {
   const navigate = useNavigate();
 
   const columns = useMemo<MRT_ColumnDef<SiteMobile>[]>(() => [
-    { accessorKey: "numero", header: "Numéro", size: 100 },
+    {
+      accessorKey: "numero",
+      header: "Numéro",
+      size: 30,
+    },
     { accessorKey: "adresse", header: "Adresse", size: 200 },
     { accessorKey: "coordonnees", header: "Coordonnées", size: 200 },
-    { accessorKey: "equipement", header: "Équipement", size: 150 },
-    { accessorKey: "technologie", header: "Technologie", size: 150 },
-    { accessorKey: "type", header: "Type", size: 100 },
-  ], []);
+    { accessorKey: "equipement", header: "Équipement", size: 200 },
+    { accessorKey: "technologie", header: "Technologie", size: 100 },
+    { accessorKey: "type", header: "Type", size: 150 },
+    { accessorKey: "acces", header: "Accès", size: 150 },
+    {
+      header: "Action",
+      id: "action",
+      size: 100,
+      Cell: ({ row }) => (
+        <button
+          className="btn btn-sm btn-warning"
+          onClick={() => {
+            localStorage.setItem("siteToEdit", JSON.stringify(row.original));
+            navigate("/ajoutsite");
+          }}
+        >
+          Modifier
+        </button>
+      ),
+    },
+  ], [navigate]);
 
   const table = useMaterialReactTable({
     columns,
-    data,
+    data: dataWithIndex,
   });
 
-  const handleNavigateToPending = () => {
-    navigate("/sitesenattente");
-  };
-
   const handleExportExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    const worksheet = XLSX.utils.json_to_sheet(dataWithIndex);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Sites Mobiles");
 
@@ -87,9 +110,9 @@ const SiteMobile = () => {
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h2 className="text-primary">Liste des sites mobiles</h2>
-        <div>
-          <button className="btn btn-secondary me-2" onClick={handleNavigateToPending}>
-            Sites mobiles en attente
+        <div className="d-flex gap-2">
+        <button className="btn btn-primary" onClick={() => navigate("/ajoutsite")}>
+            Ajouter site mobile
           </button>
           <button className="btn btn-success" onClick={handleExportExcel}>
             Exporter en Excel

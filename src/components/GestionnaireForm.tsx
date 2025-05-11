@@ -38,7 +38,6 @@ const AjouterUtilisateur = () => {
 
   useEffect(() => {
     if (userToEdit) {
-      // ✅ Update telephone by removing +216 if it's included
       const cleanPhone = userToEdit.telephone.replace("+216", "").trim();
       setFormData({ ...userToEdit, telephone: cleanPhone });
     }
@@ -102,131 +101,164 @@ const AjouterUtilisateur = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="card shadow">
-        <div className="card-header bg-primary text-white">
-          <h3>{userToEdit ? "Modifier un Utilisateur" : "Ajouter un Utilisateur"}</h3>
-        </div>
-        <div className="card-body">
-          <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label className="form-label">Nom</label>
-              <input
-                type="text"
-                name="nom"
-                className="form-control"
-                value={formData.nom}
-                onChange={handleChange}
-                required
-              />
+    <div className="container mt-4">
+      <div className="row justify-content-center">
+        <div className="col-lg-8">
+          <div className="card border-0 shadow-sm">
+            <div className="card-header bg-primary text-white py-3">
+              <h4 className="mb-0">
+                {userToEdit ? "Modifier un Utilisateur" : "Ajouter un Utilisateur"}
+              </h4>
             </div>
+            <div className="card-body p-4">
+              <form onSubmit={handleSubmit}>
+                <div className="row g-3">
+                  <div className="col-md-6">
+                    <div className="mb-3">
+                      <label className="form-label fw-medium">Nom</label>
+                      <input
+                        type="text"
+                        name="nom"
+                        className="form-control"
+                        value={formData.nom}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </div>
 
-            <div className="mb-3">
-              <label className="form-label">Prénom</label>
-              <input
-                type="text"
-                name="prenom"
-                className="form-control"
-                value={formData.prenom}
-                onChange={handleChange}
-                required
-              />
+                  <div className="col-md-6">
+                    <div className="mb-3">
+                      <label className="form-label fw-medium">Prénom</label>
+                      <input
+                        type="text"
+                        name="prenom"
+                        className="form-control"
+                        value={formData.prenom}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <div className="mb-3">
+                      <label className="form-label fw-medium">Email</label>
+                      <input
+                        type="email"
+                        name="email"
+                        className="form-control"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <div className="mb-3">
+                      <label className="form-label fw-medium">Téléphone</label>
+                      <input
+                        type="text"
+                        name="telephone"
+                        className="form-control"
+                        value={formData.telephone}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <div className="mb-3">
+                      <label className="form-label fw-medium">Siège</label>
+                      <select
+                        name="siege"
+                        className="form-select"
+                        value={formData.siege}
+                        onChange={handleChange}
+                        required
+                      >
+                        <option value="">-- Sélectionnez une région --</option>
+                        {tunisianRegions.map((region, idx) => (
+                          <option key={idx} value={region}>
+                            {region}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="col-12">
+                    <div className="mb-3">
+                      <label className="form-label fw-medium d-block">Rôle</label>
+                      <div className="d-flex gap-3">
+                        <div className="form-check">
+                          <input
+                            type="radio"
+                            name="role"
+                            value="GESTIONNAIRE"
+                            checked={formData.role === "GESTIONNAIRE"}
+                            onChange={handleChange}
+                            className="form-check-input"
+                            id="gestionnaire"
+                          />
+                          <label htmlFor="gestionnaire" className="form-check-label">
+                            Gestionnaire
+                          </label>
+                        </div>
+                        <div className="form-check">
+                          <input
+                            type="radio"
+                            name="role"
+                            value="TECHNICIEN"
+                            checked={formData.role === "TECHNICIEN"}
+                            onChange={handleChange}
+                            className="form-check-input"
+                            id="technicien"
+                          />
+                          <label htmlFor="technicien" className="form-check-label">
+                            Technicien
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <div className="mb-4">
+                      <label className="form-label fw-medium">Mot de passe</label>
+                      <div className="input-group">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          className="form-control"
+                          value={formData.password}
+                          readOnly
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                        >
+                          {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="col-12">
+                    <button 
+                      type="submit" 
+                      className="btn btn-primary px-4 py-2"
+                    >
+                      {userToEdit ? "Enregistrer Modification" : "Ajouter"}
+                    </button>
+                  </div>
+                </div>
+              </form>
             </div>
-
-            <div className="mb-3">
-              <label className="form-label">Email</label>
-              <input
-                type="email"
-                name="email"
-                className="form-control"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">Téléphone</label>
-              <input
-                type="text"
-                name="telephone"
-                className="form-control"
-                value={formData.telephone}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">Siège</label>
-              <select
-                name="siege"
-                className="form-select"
-                value={formData.siege}
-                onChange={handleChange}
-                required
-              >
-                <option value="">-- Sélectionnez une région --</option>
-                {tunisianRegions.map((region, idx) => (
-                  <option key={idx} value={region}>
-                    {region}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label d-block">Rôle</label>
-              <div className="form-check form-check-inline">
-                <input
-                  type="radio"
-                  name="role"
-                  value="GESTIONNAIRE"
-                  checked={formData.role === "GESTIONNAIRE"}
-                  onChange={handleChange}
-                  className="form-check-input"
-                  id="gestionnaire"
-                />
-                <label htmlFor="gestionnaire" className="form-check-label">Gestionnaire</label>
-              </div>
-              <div className="form-check form-check-inline">
-                <input
-                  type="radio"
-                  name="role"
-                  value="TECHNICIEN"
-                  checked={formData.role === "TECHNICIEN"}
-                  onChange={handleChange}
-                  className="form-check-input"
-                  id="technicien"
-                />
-                <label htmlFor="technicien" className="form-check-label">Technicien</label>
-              </div>
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">Mot de passe</label>
-              <div className="input-group">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  className="form-control"
-                  value={formData.password}
-                  readOnly
-                />
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
-                </button>
-              </div>
-            </div>
-
-            <button type="submit" className="btn btn-success">
-              {userToEdit ? "Enregistrer Modification" : "Ajouter"}
-            </button>
-          </form>
+          </div>
         </div>
       </div>
     </div>
