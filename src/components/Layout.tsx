@@ -8,24 +8,53 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className="container-fluid vh-100">
-      <div className="row h-100">
-        {/* Sidebar */}
-        <div className="col-auto bg-primary text-white p-0" style={{ width: '280px' }}>
-          <Sidebar />
+    <div
+      style={{
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Sidebar */}
+      <div
+        style={{
+          width: '280px',
+          flexShrink: 0,
+          backgroundColor: '#0d6efd', // bootstrap primary
+          color: 'white',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'auto',
+        }}
+      >
+        <Sidebar />
+      </div>
+
+      {/* Main content column */}
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Header */}
+        <div style={{ flexShrink: 0 }}>
+          <Header />
         </div>
 
-        {/* Main content */}
-        <div className="col d-flex flex-column h-100 p-0">
-          {/* Header */}
-          <div className="bg-white shadow-sm">
-            <Header />
-          </div>
-
-          {/* Content */}
-          <div className="flex-grow-1 overflow-auto p-4 bg-light">
-            {children}
-          </div>
+        {/* Scrollable content area */}
+        <div
+          style={{
+            flex: 1,
+            overflow: 'auto',
+            backgroundColor: '#f8f9fa', // bootstrap light
+            padding: '1.5rem',        // roughly p-4
+          }}
+        >
+          {children}
         </div>
       </div>
     </div>

@@ -8,55 +8,84 @@ import {
 import "bootstrap/dist/css/bootstrap.min.css";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-
+import { Button } from "react-bootstrap";
 
 type Manager = {
   id: number;
-  fullName: string;
+  nom: string;
+  prenom: string;
   email: string;
-  phone: string;
-  region: string;
+  siege: string;
+  telephone: string;
+  role: string;
 };
 
+// Temporary static data
 const data: Manager[] = [
   {
     id: 1,
-    fullName: "Mme Trabelsi",
-    email: "trabelsi@example.com",
-    phone: "11112233",
-    region: "Tunis",
+    nom: "Trabelsi",
+    prenom: "Amira",
+    email: "amira.trabelsi@example.com",
+    siege: "Tunis",
+    telephone: "22 334 556",
+    role: "GESTIONNAIRE",
   },
   {
     id: 2,
-    fullName: "Mr Ghariani",
-    email: "ghariani@example.com",
-    phone: "99887766",
-    region: "Sfax",
+    nom: "Ghariani",
+    prenom: "Nidhal",
+    email: "nidhal.ghariani@example.com",
+    siege: "Sfax",
+    telephone: "98 123 456",
+    role: "TECHNICIEN",
   },
 ];
 
+// Filter gestionnaires only
+const gestionnaires = data.filter((item) => item.role === "GESTIONNAIRE");
+
 const GestionnaireList = () => {
+  const navigate = useNavigate();
+
+  const handleEdit = (manager: Manager) => {
+    navigate("/gestionnaireform", { state: { manager } });
+  };
+
   const columns = useMemo<MRT_ColumnDef<Manager>[]>(() => [
     { accessorKey: "id", header: "ID", size: 50 },
-    { accessorKey: "fullName", header: "Nom Complet", size: 150 },
+    { accessorKey: "nom", header: "Nom", size: 120 },
+    { accessorKey: "prenom", header: "Prénom", size: 120 },
     { accessorKey: "email", header: "Email", size: 200 },
-    { accessorKey: "phone", header: "Téléphone", size: 120 },
-    { accessorKey: "region", header: "Région", size: 100 },
+    { accessorKey: "telephone", header: "Téléphone", size: 130 },
+    { accessorKey: "siege", header: "Siège", size: 100 },
+    {
+      header: "Action",
+      accessorKey: "action",
+      size: 100,
+      Cell: ({ row }) => (
+        <Button
+          variant="warning"
+          size="sm"
+          onClick={() => handleEdit(row.original)}
+        >
+          Modifier
+        </Button>
+      ),
+    },
   ], []);
 
   const table = useMaterialReactTable({
     columns,
-    data,
+    data: gestionnaires,
+    enableRowSelection: false, // optional feature
+    enableColumnFilters: true,
+    enablePagination: true,
   });
 
-  const navigate = useNavigate();
-
-  const handleAddManager = () => {
-    navigate("/gestionnaireform");
-  };
-
   const handleExportExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    const exportData = gestionnaires.map(({ role, ...rest }) => rest); // remove role
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Gestionnaires");
 
@@ -64,6 +93,7 @@ const GestionnaireList = () => {
       bookType: "xlsx",
       type: "array",
     });
+
     const fileData = new Blob([excelBuffer], {
       type: "application/octet-stream",
     });
@@ -74,14 +104,9 @@ const GestionnaireList = () => {
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h2 className="text-primary">Liste des gestionnaires</h2>
-        <div>
-          <button className="btn btn-primary me-2" onClick={handleAddManager}>
-            Ajouter un gestionnaire
-          </button>
-          <button className="btn btn-success" onClick={handleExportExcel}>
-            Exporter en Excel
-          </button>
-        </div>
+        <button className="btn btn-success" onClick={handleExportExcel}>
+          Exporter en Excel
+        </button>
       </div>
       <MaterialReactTable table={table} />
     </div>

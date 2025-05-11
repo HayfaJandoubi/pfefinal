@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const AjouterUtilisateur = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const userToEdit = location.state?.userToEdit || null;
 
   const [formData, setFormData] = useState({
     nom: "",
@@ -15,11 +18,13 @@ const AjouterUtilisateur = () => {
     password: generatePassword(),
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+
   const tunisianRegions = [
-    "Ariana", "Béja", "Ben Arous", "Bizerte", "Gabès", "Gafsa",
-    "Jendouba", "Kairouan", "Kasserine", "Kébili", "Kef", "Mahdia",
-    "Manouba", "Médenine", "Monastir", "Nabeul", "Sfax", "Sidi Bouzid",
-    "Siliana", "Sousse", "Tataouine", "Tozeur", "Tunis", "Zaghouan"
+    "Ariana", "Béja", "Ben Arous", "Bizerte", "Gabès", "Gafsa", "Jendouba",
+    "Kairouan", "Kasserine", "Kébili", "Kef", "Mahdia", "Manouba", "Médenine",
+    "Monastir", "Nabeul", "Sfax", "Sidi Bouzid", "Siliana", "Sousse", "Tataouine",
+    "Tozeur", "Tunis", "Zaghouan"
   ];
 
   function generatePassword(length = 10) {
@@ -30,6 +35,14 @@ const AjouterUtilisateur = () => {
     }
     return password;
   }
+
+  useEffect(() => {
+    if (userToEdit) {
+      // ✅ Update telephone by removing +216 if it's included
+      const cleanPhone = userToEdit.telephone.replace("+216", "").trim();
+      setFormData({ ...userToEdit, telephone: cleanPhone });
+    }
+  }, [userToEdit]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -61,44 +74,29 @@ const AjouterUtilisateur = () => {
     try {
       Swal.fire({
         title: "Veuillez patienter...",
-        text: "Ajout de l'utilisateur en cours.",
+        text: userToEdit ? "Mise à jour en cours..." : "Ajout de l'utilisateur en cours.",
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading(),
       });
 
-      // Simulate API call
       await new Promise((res) => setTimeout(res, 1000));
 
       Swal.close();
       Swal.fire({
         icon: "success",
-        title: "Ajout Réussi",
-        text: `L'utilisateur a été ajouté avec succès.`,
+        title: userToEdit ? "Modification Réussie" : "Ajout Réussi",
+        text: userToEdit
+          ? "Les informations ont été mises à jour."
+          : "L'utilisateur a été ajouté avec succès.",
       });
 
-      // Redirect based on role
-      if (formData.role === "GESTIONNAIRE") {
-        navigate("/gestionnaires");
-      } else if (formData.role === "TECHNICIEN") {
-        navigate("/techniciens");
-      }
-
-      setFormData({
-        nom: "",
-        prenom: "",
-        email: "",
-        siege: "",
-        telephone: "",
-        role: "",
-        password: generatePassword(),
-      });
-
+      navigate("/gestionnaires");
     } catch (error) {
       Swal.close();
       Swal.fire({
         icon: "error",
         title: "Erreur",
-        text: "Erreur lors de l'ajout de l'utilisateur.",
+        text: "Une erreur s'est produite.",
       });
     }
   };
@@ -107,7 +105,7 @@ const AjouterUtilisateur = () => {
     <div className="container mt-5">
       <div className="card shadow">
         <div className="card-header bg-primary text-white">
-          <h3>Ajouter un Utilisateur</h3>
+          <h3>{userToEdit ? "Modifier un Utilisateur" : "Ajouter un Utilisateur"}</h3>
         </div>
         <div className="card-body">
           <form onSubmit={handleSubmit}>
@@ -153,7 +151,7 @@ const AjouterUtilisateur = () => {
                 type="text"
                 name="telephone"
                 className="form-control"
-                value={formData.telephone ? `+216 ${formData.telephone}` : "+216 "}
+                value={formData.telephone}
                 onChange={handleChange}
                 required
               />
@@ -206,18 +204,27 @@ const AjouterUtilisateur = () => {
             </div>
 
             <div className="mb-3">
-              <label className="form-label">Mot de passe (généré automatiquement)</label>
-              <input
-                type="password"
-                name="password"
-                className="form-control"
-                value={formData.password}
-                readOnly
-              />
+              <label className="form-label">Mot de passe</label>
+              <div className="input-group">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  className="form-control"
+                  value={formData.password}
+                  readOnly
+                />
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
             </div>
 
             <button type="submit" className="btn btn-success">
-              Ajouter
+              {userToEdit ? "Enregistrer Modification" : "Ajouter"}
             </button>
           </form>
         </div>
