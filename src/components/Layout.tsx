@@ -21,7 +21,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         style={{
           width: '280px',
           flexShrink: 0,
-          backgroundColor: '#0d6efd', // bootstrap primary
+          backgroundColor: '#0d6efd', 
           color: 'white',
           display: 'flex',
           flexDirection: 'column',
@@ -50,8 +50,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           style={{
             flex: 1,
             overflow: 'auto',
-            backgroundColor: '#f8f9fa', // bootstrap light
-            padding: '1.5rem',        // roughly p-4
+            backgroundColor: '#f8f9fa', 
+            padding: '1.5rem',        
           }}
         >
           {children}

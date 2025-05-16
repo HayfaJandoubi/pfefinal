@@ -19,6 +19,8 @@
     "chart.js": "^4.4.9",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.10.4",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
     "leaflet": "^1.9.4",
     "material-react-table": "^3.2.1",
     "react": "^19.0.0",

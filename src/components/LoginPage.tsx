@@ -30,9 +30,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     setIsLoading(true);
     setError('');
 
-    // Simulate API call
     setTimeout(() => {
-      // Just simulate login success (you’ll handle real auth in backend)
       if (email && password) {
         if (rememberMe) {
           localStorage.setItem('savedEmail', email);
@@ -67,7 +65,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         overflow: 'hidden',
         width: '100%',
         maxWidth: '1000px',
-        height: '100%' // Ensure container takes full height
+        height: '100%'
       }}>
         {/* Login Form Side */}
         <div style={{ flex: 1, minWidth: '300px' }}>
