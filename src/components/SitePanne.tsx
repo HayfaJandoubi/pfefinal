@@ -11,7 +11,7 @@ import { saveAs } from "file-saver";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Button, Container, Badge, Card, Row, Col, Dropdown } from "react-bootstrap";
-import { FiDownload, FiPlus, FiWifi, FiAlertTriangle, FiCheckCircle, FiMapPin } from "react-icons/fi";
+import { FiDownload, FiPlus, FiWifi, FiAlertTriangle, FiCheckCircle, FiMapPin, FiUser, FiInfo } from "react-icons/fi";
 
 const theme = {
   primary: "#3f51b5",
@@ -26,66 +26,77 @@ const theme = {
   card: "#ffffff"
 };
 
-type SiteMobile = {
+interface SitePanne {
+  id: number;
+  nom: string;
   adresse: string;
   coordonnees: string;
-  equipement: string;
-  technologie: string;
-  type: string;
-  acces: string;
-  etat: string;
-  numero: number;
-};
+  typePanne: string;
+  date: string;
+  etat: "Non résolue" | "En cours" | "Résolue";
+  gestionnaire: string;
+  technicien?: string;
+}
 
-const originalData: SiteMobile[] = [
-  {
-    numero: 1,
-    adresse: "Rue Habib Bourguiba",
-    coordonnees: "36.8065, 10.1815",
-    equipement: "Alcatel",
-    technologie: "Tec4G",
-    type: "Outdoor",
-    acces: "Autorisé",
-    etat: "Opérationnel",
-  },
-  {
-    numero: 2,
-    adresse: "Avenue de la Liberté",
-    coordonnees: "36.8000, 10.1700",
-    equipement: "Ericsson",
-    technologie: "Tec5G",
-    type: "Indoor",
-    acces: "Non autorisé",
-    etat: "En panne", 
-  },
-  {
-    numero: 3,
-    adresse: "Rue de Marseille",
-    coordonnees: "36.8145, 10.1650",
-    equipement: "Hwauei",
-    technologie: "Tec3G",
-    type: "Outdoor",
-    acces: "Autorisé",
-    etat: "Opérationnel",
-  },
-];
-
-const SiteMobile = () => {
+const SitePanne: React.FC = () => {
   const navigate = useNavigate();
-  const [data, setData] = useState<SiteMobile[]>(originalData);
-  const previousDataRef = useRef<SiteMobile[]>(originalData);
+  const [data, setData] = useState<SitePanne[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const previousDataRef = useRef<SitePanne[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      const newData = [...data];
-      const operationalSites = newData.filter(site => site.etat === "Opérationnel");
-      if (operationalSites.length > 0) {
-        operationalSites[0].etat = "En panne";
-        setData(newData);
+    const fetchSitesPanne = async () => {
+      try {
+        // Example mock data - replace this with your API call
+        const mockData: SitePanne[] = [
+          {
+            id: 1,
+            nom: 'Site Sahloul',
+            adresse: 'Sahloul, Sousse',
+            coordonnees: '35.8256, 10.6084',
+            typePanne: 'Problème réseau',
+            date: '2023-05-15',
+            etat: 'Non résolue',
+            gestionnaire: 'gestionnaire1'
+          },
+          {
+            id: 2,
+            nom: 'Site Menzah',
+            adresse: 'Menzah 6, Tunis',
+            coordonnees: '36.8412, 10.2034',
+            typePanne: 'Panne matérielle',
+            date: '2023-05-10',
+            etat: 'En cours',
+            gestionnaire: 'gestionnaire1',
+            technicien: 'Tech123'
+          },
+          {
+            id: 3,
+            nom: 'Site Lac',
+            adresse: 'Lac 2, Tunis',
+            coordonnees: '36.8389, 10.2267',
+            typePanne: 'Problème électrique',
+            date: '2023-05-05',
+            etat: 'Résolue',
+            gestionnaire: 'gestionnaire1',
+            technicien: 'Tech456'
+          }
+        ];
+
+        // Only show sites under the connected gestionnaire's supervision
+        const gestionnaireActuel = 'gestionnaire1';
+        const filteredSites = mockData.filter(site => site.gestionnaire === gestionnaireActuel);
+
+        setData(filteredSites);
+        setLoading(false);
+      } catch (error) {
+        console.error('Erreur lors du chargement des sites en panne:', error);
+        setLoading(false);
       }
-    }, 5000);
-    return () => clearTimeout(timeout);
+    };
+
+    fetchSitesPanne();
   }, []);
 
   useEffect(() => {
@@ -93,15 +104,15 @@ const SiteMobile = () => {
   }, [data]);
 
   // Calculate statistics
-  const totalSites = data.length;
-  const operationalSites = data.filter(site => site.etat === "Opérationnel").length;
-  const downSites = data.filter(site => site.etat === "En panne").length;
-  const authorizedAccess = data.filter(site => site.acces === "Autorisé").length;
+  const totalPannes = data.length;
+  const nonResolues = data.filter(site => site.etat === "Non résolue").length;
+  const enCours = data.filter(site => site.etat === "En cours").length;
+  const resolues = data.filter(site => site.etat === "Résolue").length;
 
-  const columns = useMemo<MRT_ColumnDef<SiteMobile>[]>(() => [
+  const columns = useMemo<MRT_ColumnDef<SitePanne>[]>(() => [
     { 
-      accessorKey: "numero", 
-      header: "Numéro", 
+      accessorKey: "id", 
+      header: "ID", 
       size: 30,
       muiTableHeadCellProps: {
         align: "center",
@@ -111,48 +122,51 @@ const SiteMobile = () => {
       },
     },
     { 
+      accessorKey: "nom", 
+      header: "Nom du site", 
+      size: 150 
+    },
+    { 
       accessorKey: "adresse", 
       header: "Adresse", 
-      size: 200 
+      size: 150 
     },
     { 
       accessorKey: "coordonnees", 
       header: "Coordonnées", 
+      size: 120 
+    },
+    { 
+      accessorKey: "typePanne", 
+      header: "Type de panne", 
       size: 150 
     },
     { 
-      accessorKey: "equipement", 
-      header: "Équipement", 
-      size: 150 
-    },
-    { 
-      accessorKey: "technologie", 
-      header: "Technologie", 
-      size: 100 
-    },
-    { 
-      accessorKey: "type", 
-      header: "Type", 
-      size: 100 
-    },
-    { 
-      accessorKey: "acces", 
-      header: "Accès", 
+      accessorKey: "date", 
+      header: "Date", 
       size: 100 
     },
     {
       accessorKey: "etat",
       header: "État",
-      size: 80,
+      size: 100,
       Cell: ({ cell }) => {
         const etat = cell.getValue<string>();
+        let badgeClass = "";
+        switch(etat) {
+          case "Non résolue":
+            badgeClass = "bg-danger";
+            break;
+          case "En cours":
+            badgeClass = "bg-warning";
+            break;
+          case "Résolue":
+            badgeClass = "bg-success";
+            break;
+        }
         return (
           <span
-            className={`badge px-2 py-1 rounded-pill fw-bold ${
-              etat === "En panne"
-                ? "bg-danger text-white"
-                : "bg-success text-white"
-            }`}
+            className={`badge px-2 py-1 rounded-pill fw-bold ${badgeClass} text-white`}
           >
             {etat}
           </span>
@@ -162,19 +176,31 @@ const SiteMobile = () => {
     {
       header: "Action",
       id: "action",
-      size: 80,
+      size: 100,
       Cell: ({ row }) => (
         <Button
-          variant="outline-warning"
+          variant={row.original.etat === "Non résolue" ? "outline-primary" : "outline-info"}
           size="sm"
           onClick={() => {
-            localStorage.setItem("siteToEdit", JSON.stringify(row.original));
-            navigate("/ajoutsite");
+            if (row.original.etat === "Non résolue") {
+              navigate("/assigner-technicien", { state: { site: row.original } });
+            } else {
+              navigate("/details-intervention", { state: { site: row.original } });
+            }
           }}
           className="d-flex align-items-center"
         >
-          <FiPlus className="me-1" />
-          Modifier
+          {row.original.etat === "Non résolue" ? (
+            <>
+              <FiUser className="me-1" />
+              Assigner technicien
+            </>
+          ) : (
+            <>
+              <FiInfo className="me-1" />
+              Détails intervention
+            </>
+          )}
         </Button>
       ),
       muiTableHeadCellProps: {
@@ -189,31 +215,30 @@ const SiteMobile = () => {
   const handleExportExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sites Mobiles");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sites en panne");
     const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
     const fileData = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(fileData, "sites_mobiles.xlsx");
+    saveAs(fileData, "sites_panne.xlsx");
     setShowDropdown(false);
   };
 
   const handleExportPDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(18);
-    doc.text("Liste des Sites Mobiles", 14, 15);
+    doc.text("Liste des Sites en Panne", 14, 15);
 
     const headers = [
-      "Numéro", "Adresse", "Coordonnées", "Équipement",
-      "Technologie", "Type", "Accès", "État"
+      "ID", "Nom du site", "Adresse", "Coordonnées", 
+      "Type de panne", "Date", "État"
     ];
 
     const rows = data.map(site => [
-      site.numero.toString(),
+      site.id.toString(),
+      site.nom,
       site.adresse,
       site.coordonnees,
-      site.equipement,
-      site.technologie,
-      site.type,
-      site.acces,
+      site.typePanne,
+      site.date,
       site.etat
     ]);
 
@@ -237,7 +262,7 @@ const SiteMobile = () => {
       }
     });
 
-    doc.save("sites_mobiles.pdf");
+    doc.save("sites_panne.pdf");
     setShowDropdown(false);
   };
 
@@ -276,7 +301,7 @@ const SiteMobile = () => {
         '&:hover': {
           backgroundColor: 'rgba(63, 81, 181, 0.05) !important',
         },
-        ...(row.original.etat === "En panne"
+        ...(row.original.etat === "Non résolue"
           ? {
               borderLeft: "4px solid #dc3545",
               borderRight: "4px solid #dc3545",
@@ -290,6 +315,12 @@ const SiteMobile = () => {
               margin: "4px 0",
               animation: "pulse 1.5s infinite",
             }
+          : row.original.etat === "En cours"
+          ? {
+              borderLeft: "4px solid #ffc107",
+              backgroundColor: "#fff3cd",
+              color: "#856404",
+            }
           : {}),
       },
     }),
@@ -300,27 +331,19 @@ const SiteMobile = () => {
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div className="d-flex align-items-center">
-          <div className="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
-            <FiWifi size={24} color={theme.primary} />
+          <div className="bg-danger bg-opacity-10 p-3 rounded-circle me-3">
+            <FiAlertTriangle size={24} color={theme.danger} />
           </div>
           <div>
             <h2 className="mb-0 fw-bold" style={{ color: theme.dark }}>
-              Liste des sites mobiles
+              Liste des sites en panne
             </h2>
             <p className="mb-0 text-muted">
-              Gestion des sites mobiles et de leur état
+              Gestion des pannes sous votre supervision
             </p>
           </div>
         </div>
         <div className="d-flex gap-2">
-          <Button
-            variant="primary"
-            onClick={() => navigate("/ajoutsite")}
-            className="d-flex align-items-center"
-          >
-            <FiPlus className="me-2" />
-            Ajouter site
-          </Button>
           <Dropdown show={showDropdown} onToggle={setShowDropdown}>
             <Dropdown.Toggle variant="success" className="d-flex align-items-center">
               <FiDownload className="me-2" />
@@ -337,30 +360,15 @@ const SiteMobile = () => {
       {/* Stats Cards */}
       <Row className="mb-4 g-3">
         <Col md={3}>
-          <Card className="border-0 shadow-sm h-100" style={{ borderTop: `4px solid ${theme.primary}` }}>
+          <Card className="border-0 shadow-sm h-100" style={{ borderTop: `4px solid ${theme.danger}` }}>
             <Card.Body>
               <div className="d-flex justify-content-between">
                 <div>
-                  <h6 className="text-uppercase small text-muted">Total sites</h6>
-                  <h3 className="mb-0">{totalSites}</h3>
+                  <h6 className="text-uppercase small text-muted">Total pannes</h6>
+                  <h3 className="mb-0">{totalPannes}</h3>
                 </div>
-                <div className="bg-primary bg-opacity-10 rounded-circle p-3">
-                  <FiWifi color={theme.primary} />
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={3}>
-          <Card className="border-0 shadow-sm h-100" style={{ borderTop: `4px solid ${theme.success}` }}>
-            <Card.Body>
-              <div className="d-flex justify-content-between">
-                <div>
-                  <h6 className="text-uppercase small text-muted">Opérationnels</h6>
-                  <h3 className="mb-0">{operationalSites}</h3>
-                </div>
-                <div className="bg-success bg-opacity-10 rounded-circle p-3">
-                  <FiCheckCircle color={theme.success} />
+                <div className="bg-danger bg-opacity-10 rounded-circle p-3">
+                  <FiAlertTriangle color={theme.danger} />
                 </div>
               </div>
             </Card.Body>
@@ -371,8 +379,8 @@ const SiteMobile = () => {
             <Card.Body>
               <div className="d-flex justify-content-between">
                 <div>
-                  <h6 className="text-uppercase small text-muted">En panne</h6>
-                  <h3 className="mb-0">{downSites}</h3>
+                  <h6 className="text-uppercase small text-muted">Non résolues</h6>
+                  <h3 className="mb-0">{nonResolues}</h3>
                 </div>
                 <div className="bg-danger bg-opacity-10 rounded-circle p-3">
                   <FiAlertTriangle color={theme.danger} />
@@ -382,15 +390,30 @@ const SiteMobile = () => {
           </Card>
         </Col>
         <Col md={3}>
-          <Card className="border-0 shadow-sm h-100" style={{ borderTop: `4px solid ${theme.info}` }}>
+          <Card className="border-0 shadow-sm h-100" style={{ borderTop: `4px solid ${theme.warning}` }}>
             <Card.Body>
               <div className="d-flex justify-content-between">
                 <div>
-                  <h6 className="text-uppercase small text-muted">Accès autorisé</h6>
-                  <h3 className="mb-0">{authorizedAccess}</h3>
+                  <h6 className="text-uppercase small text-muted">En cours</h6>
+                  <h3 className="mb-0">{enCours}</h3>
                 </div>
-                <div className="bg-info bg-opacity-10 rounded-circle p-3">
-                  <FiMapPin color={theme.info} />
+                <div className="bg-warning bg-opacity-10 rounded-circle p-3">
+                  <FiAlertTriangle color={theme.warning} />
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={3}>
+          <Card className="border-0 shadow-sm h-100" style={{ borderTop: `4px solid ${theme.success}` }}>
+            <Card.Body>
+              <div className="d-flex justify-content-between">
+                <div>
+                  <h6 className="text-uppercase small text-muted">Résolues</h6>
+                  <h3 className="mb-0">{resolues}</h3>
+                </div>
+                <div className="bg-success bg-opacity-10 rounded-circle p-3">
+                  <FiCheckCircle color={theme.success} />
                 </div>
               </div>
             </Card.Body>
@@ -450,4 +473,4 @@ const SiteMobile = () => {
   );
 };
 
-export default SiteMobile;
+export default SitePanne;

@@ -26,66 +26,67 @@ const theme = {
   card: "#ffffff"
 };
 
-type SiteMobile = {
+interface Site {
+  id: number;
   adresse: string;
   coordonnees: string;
   equipement: string;
   technologie: string;
   type: string;
   acces: string;
+  gestionnaire: string;
   etat: string;
-  numero: number;
-};
+}
 
-const originalData: SiteMobile[] = [
-  {
-    numero: 1,
-    adresse: "Rue Habib Bourguiba",
-    coordonnees: "36.8065, 10.1815",
-    equipement: "Alcatel",
-    technologie: "Tec4G",
-    type: "Outdoor",
-    acces: "Autorisé",
-    etat: "Opérationnel",
-  },
-  {
-    numero: 2,
-    adresse: "Avenue de la Liberté",
-    coordonnees: "36.8000, 10.1700",
-    equipement: "Ericsson",
-    technologie: "Tec5G",
-    type: "Indoor",
-    acces: "Non autorisé",
-    etat: "En panne", 
-  },
-  {
-    numero: 3,
-    adresse: "Rue de Marseille",
-    coordonnees: "36.8145, 10.1650",
-    equipement: "Hwauei",
-    technologie: "Tec3G",
-    type: "Outdoor",
-    acces: "Autorisé",
-    etat: "Opérationnel",
-  },
-];
-
-const SiteMobile = () => {
+const SiteGest: React.FC = () => {
   const navigate = useNavigate();
-  const [data, setData] = useState<SiteMobile[]>(originalData);
-  const previousDataRef = useRef<SiteMobile[]>(originalData);
+  const [data, setData] = useState<Site[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const previousDataRef = useRef<Site[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      const newData = [...data];
-      const operationalSites = newData.filter(site => site.etat === "Opérationnel");
-      if (operationalSites.length > 0) {
-        operationalSites[0].etat = "En panne";
-        setData(newData);
+    const fetchSites = async () => {
+      try {
+        // Example mock data - replace this with your API call
+        const mockData: Site[] = [
+          {
+            id: 1,
+            adresse: 'Sahloul, Sousse',
+            coordonnees: '35.8256, 10.6084',
+            equipement: 'Nokia',
+            technologie: '4G',
+            type: 'Mobile',
+            acces: 'Libre',
+            gestionnaire: 'gestionnaire1',
+            etat: 'Opérationnel'
+          },
+          {
+            id: 2,
+            adresse: 'Menzah 6, Tunis',
+            coordonnees: '36.8412, 10.2034',
+            equipement: 'Huawei',
+            technologie: '5G',
+            type: 'Mobile',
+            acces: 'Sécurisé',
+            gestionnaire: 'gestionnaire1',
+            etat: 'Opérationnel'
+          }
+        ];
+
+        // Only show sites under the connected gestionnaire's supervision
+        const gestionnaireActuel = 'gestionnaire1';
+        const filteredSites = mockData.filter(site => site.gestionnaire === gestionnaireActuel);
+
+        setData(filteredSites);
+        setLoading(false);
+      } catch (error) {
+        console.error('Erreur lors du chargement des sites:', error);
+        setLoading(false);
       }
-    }, 5000);
-    return () => clearTimeout(timeout);
+    };
+
+    fetchSites();
   }, []);
 
   useEffect(() => {
@@ -96,12 +97,12 @@ const SiteMobile = () => {
   const totalSites = data.length;
   const operationalSites = data.filter(site => site.etat === "Opérationnel").length;
   const downSites = data.filter(site => site.etat === "En panne").length;
-  const authorizedAccess = data.filter(site => site.acces === "Autorisé").length;
+  const freeAccess = data.filter(site => site.acces === "Libre").length;
 
-  const columns = useMemo<MRT_ColumnDef<SiteMobile>[]>(() => [
+  const columns = useMemo<MRT_ColumnDef<Site>[]>(() => [
     { 
-      accessorKey: "numero", 
-      header: "Numéro", 
+      accessorKey: "id", 
+      header: "ID", 
       size: 30,
       muiTableHeadCellProps: {
         align: "center",
@@ -189,25 +190,25 @@ const SiteMobile = () => {
   const handleExportExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sites Mobiles");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sites Gestionnaire");
     const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
     const fileData = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(fileData, "sites_mobiles.xlsx");
+    saveAs(fileData, "sites_gestionnaire.xlsx");
     setShowDropdown(false);
   };
 
   const handleExportPDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(18);
-    doc.text("Liste des Sites Mobiles", 14, 15);
+    doc.text("Liste des Sites Gestionnaire", 14, 15);
 
     const headers = [
-      "Numéro", "Adresse", "Coordonnées", "Équipement",
+      "ID", "Adresse", "Coordonnées", "Équipement",
       "Technologie", "Type", "Accès", "État"
     ];
 
     const rows = data.map(site => [
-      site.numero.toString(),
+      site.id.toString(),
       site.adresse,
       site.coordonnees,
       site.equipement,
@@ -237,7 +238,7 @@ const SiteMobile = () => {
       }
     });
 
-    doc.save("sites_mobiles.pdf");
+    doc.save("sites_gestionnaire.pdf");
     setShowDropdown(false);
   };
 
@@ -305,22 +306,14 @@ const SiteMobile = () => {
           </div>
           <div>
             <h2 className="mb-0 fw-bold" style={{ color: theme.dark }}>
-              Liste des sites mobiles
+              Liste des sites gestionnaire
             </h2>
             <p className="mb-0 text-muted">
-              Gestion des sites mobiles et de leur état
+              Gestion des sites sous votre supervision
             </p>
           </div>
         </div>
         <div className="d-flex gap-2">
-          <Button
-            variant="primary"
-            onClick={() => navigate("/ajoutsite")}
-            className="d-flex align-items-center"
-          >
-            <FiPlus className="me-2" />
-            Ajouter site
-          </Button>
           <Dropdown show={showDropdown} onToggle={setShowDropdown}>
             <Dropdown.Toggle variant="success" className="d-flex align-items-center">
               <FiDownload className="me-2" />
@@ -386,8 +379,8 @@ const SiteMobile = () => {
             <Card.Body>
               <div className="d-flex justify-content-between">
                 <div>
-                  <h6 className="text-uppercase small text-muted">Accès autorisé</h6>
-                  <h3 className="mb-0">{authorizedAccess}</h3>
+                  <h6 className="text-uppercase small text-muted">Accès libre</h6>
+                  <h3 className="mb-0">{freeAccess}</h3>
                 </div>
                 <div className="bg-info bg-opacity-10 rounded-circle p-3">
                   <FiMapPin color={theme.info} />
@@ -450,4 +443,4 @@ const SiteMobile = () => {
   );
 };
 
-export default SiteMobile;
+export default SiteGest;

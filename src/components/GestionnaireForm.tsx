@@ -1,7 +1,21 @@
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaUser, FaPhone, FaEnvelope, FaMapMarkerAlt, FaKey, FaSave, FaUserShield, FaUserCog } from "react-icons/fa";
+import { Container, Card, Form, Button, Row, Col, InputGroup } from "react-bootstrap";
+
+const theme = {
+  primary: "#3f51b5",
+  secondary: "#6c757d",
+  success: "#4caf50",
+  info: "#00acc1",
+  warning: "#ff9800",
+  danger: "#f44336",
+  light: "#f8f9fa",
+  dark: "#212529",
+  background: "#f5f7fa",
+  card: "#ffffff"
+};
 
 const AjouterUtilisateur = () => {
   const navigate = useNavigate();
@@ -19,6 +33,7 @@ const AjouterUtilisateur = () => {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [phoneError, setPhoneError] = useState("");
 
   const tunisianRegions = [
     "Ariana", "Béja", "Ben Arous", "Bizerte", "Gabès", "Gafsa", "Jendouba",
@@ -43,16 +58,33 @@ const AjouterUtilisateur = () => {
     }
   }, [userToEdit]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
 
     if (name === "nom" || name === "prenom") {
       const capitalized = value.replace(/\b\w/g, (c) => c.toUpperCase());
       setFormData((prev) => ({ ...prev, [name]: capitalized }));
     } else if (name === "telephone") {
-      let formatted = value.replace(/[^\d]/g, "").slice(0, 8);
-      formatted = formatted.replace(/(\d{2})(\d{3})(\d{3})/, "$1 $2 $3");
+      // Allow only digits and limit to 8 characters
+      const digitsOnly = value.replace(/[^\d]/g, "").slice(0, 8);
+      
+      // Format as XX XXX XXX
+      let formatted = digitsOnly;
+      if (digitsOnly.length > 2) {
+        formatted = `${digitsOnly.slice(0, 2)} ${digitsOnly.slice(2, 5)}`;
+        if (digitsOnly.length > 5) {
+          formatted += ` ${digitsOnly.slice(5, 8)}`;
+        }
+      }
+      
       setFormData((prev) => ({ ...prev, telephone: formatted }));
+      
+      // Validate length
+      if (digitsOnly.length < 8 && digitsOnly.length > 0) {
+        setPhoneError("Le numéro doit contenir 8 chiffres");
+      } else {
+        setPhoneError("");
+      }
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -60,6 +92,13 @@ const AjouterUtilisateur = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate phone number
+    const phoneDigits = formData.telephone.replace(/[^\d]/g, "");
+    if (phoneDigits.length !== 8) {
+      setPhoneError("Le numéro doit contenir 8 chiffres");
+      return;
+    }
 
     if (!formData.role) {
       Swal.fire({
@@ -101,99 +140,174 @@ const AjouterUtilisateur = () => {
   };
 
   return (
-    <div className="container mt-4">
-      <div className="row justify-content-center">
-        <div className="col-lg-8">
-          <div className="card border-0 shadow-sm">
-            <div className="card-header bg-primary text-white py-3">
-              <h4 className="mb-0">
-                {userToEdit ? "Modifier un Utilisateur" : "Ajouter un Utilisateur"}
-              </h4>
-            </div>
-            <div className="card-body p-4">
-              <form onSubmit={handleSubmit}>
-                <div className="row g-3">
-                  <div className="col-md-6">
-                    <div className="mb-3">
-                      <label className="form-label fw-medium">Nom</label>
-                      <input
-                        type="text"
-                        name="nom"
-                        className="form-control"
-                        value={formData.nom}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                  </div>
+    <Container fluid className="px-4 py-4" style={{ backgroundColor: theme.background, minHeight: "100vh" }}>
+      <Row className="justify-content-center">
+        <Col lg={8} xl={6}>
+          <Card className="shadow border-0" style={{ borderRadius: '16px' }}>
+            <Card.Header className="bg-white border-bottom-0 pt-4 pb-0">
+              <div className="d-flex align-items-center mb-3">
+                <div className="bg-primary bg-opacity-10 p-3 rounded-circle me-3" style={{ width: '60px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {userToEdit ? (
+                    <FaUserCog size={24} color={theme.primary} />
+                  ) : (
+                    <FaUser size={24} color={theme.primary} />
+                  )}
+                </div>
+                <div>
+                  <h2 className="mb-0 fw-bold" style={{ color: theme.dark }}>
+                    {userToEdit ? "Modifier Utilisateur" : "Ajouter Utilisateur"}
+                  </h2>
+                  <p className="mb-0 text-muted">
+                    {userToEdit ? "Mettre à jour les informations" : "Créer un nouveau compte utilisateur"}
+                  </p>
+                </div>
+              </div>
+            </Card.Header>
+            <Card.Body className="p-4 pt-2">
+              <Form onSubmit={handleSubmit}>
+                <Row className="g-3">
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="fw-medium text-muted small">Nom</Form.Label>
+                      <InputGroup>
+                        <InputGroup.Text className="bg-light" style={{ borderRight: 'none' }}>
+                          <FaUser color={theme.secondary} />
+                        </InputGroup.Text>
+                        <Form.Control
+                          type="text"
+                          name="nom"
+                          value={formData.nom}
+                          onChange={handleChange}
+                          required
+                          style={{ borderLeft: 'none', borderTopLeftRadius: '0', borderBottomLeftRadius: '0' }}
+                        />
+                      </InputGroup>
+                    </Form.Group>
+                  </Col>
 
-                  <div className="col-md-6">
-                    <div className="mb-3">
-                      <label className="form-label fw-medium">Prénom</label>
-                      <input
-                        type="text"
-                        name="prenom"
-                        className="form-control"
-                        value={formData.prenom}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                  </div>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="fw-medium text-muted small">Prénom</Form.Label>
+                      <InputGroup>
+                        <InputGroup.Text className="bg-light" style={{ borderRight: 'none' }}>
+                          <FaUser color={theme.secondary} />
+                        </InputGroup.Text>
+                        <Form.Control
+                          type="text"
+                          name="prenom"
+                          value={formData.prenom}
+                          onChange={handleChange}
+                          required
+                          style={{ borderLeft: 'none', borderTopLeftRadius: '0', borderBottomLeftRadius: '0' }}
+                        />
+                      </InputGroup>
+                    </Form.Group>
+                  </Col>
 
-                  <div className="col-md-6">
-                    <div className="mb-3">
-                      <label className="form-label fw-medium">Email</label>
-                      <input
-                        type="email"
-                        name="email"
-                        className="form-control"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                  </div>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="fw-medium text-muted small">Email</Form.Label>
+                      <InputGroup>
+                        <InputGroup.Text className="bg-light" style={{ borderRight: 'none' }}>
+                          <FaEnvelope color={theme.secondary} />
+                        </InputGroup.Text>
+                        <Form.Control
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          required
+                          style={{ borderLeft: 'none', borderTopLeftRadius: '0', borderBottomLeftRadius: '0' }}
+                        />
+                      </InputGroup>
+                    </Form.Group>
+                  </Col>
 
-                  <div className="col-md-6">
-                    <div className="mb-3">
-                      <label className="form-label fw-medium">Téléphone</label>
-                      <input
-                        type="text"
-                        name="telephone"
-                        className="form-control"
-                        value={formData.telephone}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                  </div>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="fw-medium text-muted small">Téléphone</Form.Label>
+                      <InputGroup>
+                        <InputGroup.Text className="bg-light" style={{ borderRight: 'none' }}>
+                          +216
+                        </InputGroup.Text>
+                        <Form.Control
+                          type="text"
+                          name="telephone"
+                          value={formData.telephone}
+                          onChange={handleChange}
+                          required
+                          isInvalid={!!phoneError}
+                          style={{ borderLeft: 'none', borderTopLeftRadius: '0', borderBottomLeftRadius: '0' }}
+                          placeholder="XX XXX XXX"
+                        />
+                      </InputGroup>
+                      {phoneError && (
+                        <Form.Control.Feedback type="invalid" className="d-block">
+                          {phoneError}
+                        </Form.Control.Feedback>
+                      )}
+                    </Form.Group>
+                  </Col>
 
-                  <div className="col-md-6">
-                    <div className="mb-3">
-                      <label className="form-label fw-medium">Siège</label>
-                      <select
-                        name="siege"
-                        className="form-select"
-                        value={formData.siege}
-                        onChange={handleChange}
-                        required
-                      >
-                        <option value="">-- Sélectionnez une région --</option>
-                        {tunisianRegions.map((region, idx) => (
-                          <option key={idx} value={region}>
-                            {region}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="fw-medium text-muted small">Siège</Form.Label>
+                      <InputGroup>
+                        <InputGroup.Text className="bg-light" style={{ borderRight: 'none' }}>
+                          <FaMapMarkerAlt color={theme.secondary} />
+                        </InputGroup.Text>
+                        <Form.Select
+                          name="siege"
+                          value={formData.siege}
+                          onChange={handleChange}
+                          required
+                          style={{ borderLeft: 'none', borderTopLeftRadius: '0', borderBottomLeftRadius: '0' }}
+                        >
+                          <option value="">-- Sélectionnez une région --</option>
+                          {tunisianRegions.map((region, idx) => (
+                            <option key={idx} value={region}>
+                              {region}
+                            </option>
+                          ))}
+                        </Form.Select>
+                      </InputGroup>
+                    </Form.Group>
+                  </Col>
 
-                  <div className="col-12">
-                    <div className="mb-3">
-                      <label className="form-label fw-medium d-block">Rôle</label>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="fw-medium text-muted small">Mot de passe</Form.Label>
+                      <InputGroup>
+                        <InputGroup.Text className="bg-light" style={{ borderRight: 'none' }}>
+                          <FaKey color={theme.secondary} />
+                        </InputGroup.Text>
+                        <Form.Control
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          value={formData.password}
+                          readOnly
+                          style={{ borderLeft: 'none', borderTopLeftRadius: '0', borderBottomLeftRadius: '0' }}
+                        />
+                        <Button
+                          variant="outline-secondary"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                          style={{ borderLeft: 'none' }}
+                        >
+                          {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </Button>
+                      </InputGroup>
+                    </Form.Group>
+                  </Col>
+
+                  <Col xs={12}>
+                    <Form.Group className="mb-4">
+                      <Form.Label className="fw-medium text-muted small mb-3">Rôle</Form.Label>
                       <div className="d-flex gap-3">
-                        <div className="form-check">
+                        <div className="form-check form-check-card p-3 rounded" style={{ 
+                          border: `1px solid ${formData.role === "GESTIONNAIRE" ? theme.primary : '#e0e0e0'}`,
+                          backgroundColor: formData.role === "GESTIONNAIRE" ? 'rgba(63, 81, 181, 0.05)' : 'white',
+                          flex: 1
+                        }}>
                           <input
                             type="radio"
                             name="role"
@@ -202,12 +316,21 @@ const AjouterUtilisateur = () => {
                             onChange={handleChange}
                             className="form-check-input"
                             id="gestionnaire"
+                            style={{ marginTop: '0.2rem' }}
                           />
-                          <label htmlFor="gestionnaire" className="form-check-label">
-                            Gestionnaire
+                          <label htmlFor="gestionnaire" className="form-check-label d-flex align-items-center ms-2">
+                            <FaUserShield className="me-2" size={18} />
+                            <div>
+                              <div className="fw-bold">Gestionnaire</div>
+                              <small className="text-muted">Gestion des utilisateurs</small>
+                            </div>
                           </label>
                         </div>
-                        <div className="form-check">
+                        <div className="form-check form-check-card p-3 rounded" style={{ 
+                          border: `1px solid ${formData.role === "TECHNICIEN" ? theme.primary : '#e0e0e0'}`,
+                          backgroundColor: formData.role === "TECHNICIEN" ? 'rgba(63, 81, 181, 0.05)' : 'white',
+                          flex: 1
+                        }}>
                           <input
                             type="radio"
                             name="role"
@@ -216,52 +339,70 @@ const AjouterUtilisateur = () => {
                             onChange={handleChange}
                             className="form-check-input"
                             id="technicien"
+                            style={{ marginTop: '0.2rem' }}
                           />
-                          <label htmlFor="technicien" className="form-check-label">
-                            Technicien
+                          <label htmlFor="technicien" className="form-check-label d-flex align-items-center ms-2">
+                            <FaUserCog className="me-2" size={18} />
+                            <div>
+                              <div className="fw-bold">Technicien</div>
+                              <small className="text-muted">Maintenance technique</small>
+                            </div>
                           </label>
                         </div>
                       </div>
-                    </div>
-                  </div>
+                    </Form.Group>
+                  </Col>
 
-                  <div className="col-md-6">
-                    <div className="mb-4">
-                      <label className="form-label fw-medium">Mot de passe</label>
-                      <div className="input-group">
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          name="password"
-                          className="form-control"
-                          value={formData.password}
-                          readOnly
-                        />
-                        <button
-                          type="button"
-                          className="btn btn-outline-secondary"
-                          onClick={() => setShowPassword((prev) => !prev)}
-                        >
-                          {showPassword ? <FaEyeSlash /> : <FaEye />}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="col-12">
-                    <button 
-                      type="submit" 
-                      className="btn btn-primary px-4 py-2"
+                  <Col xs={12} className="mt-2">
+                    <Button
+                      type="submit"
+                      className="w-100 py-3 fw-bold d-flex align-items-center justify-content-center"
+                      variant="primary"
+                      style={{ borderRadius: '8px' }}
                     >
-                      {userToEdit ? "Enregistrer Modification" : "Ajouter"}
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+                      <FaSave className="me-2" />
+                      {userToEdit ? "Enregistrer les modifications" : "Ajouter l'utilisateur"}
+                    </Button>
+                  </Col>
+                </Row>
+              </Form>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Custom styles */}
+      <style>
+        {`
+          .card {
+            transition: transform 0.2s, box-shadow 0.2s;
+          }
+          .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1) !important;
+          }
+          .form-control, .form-select {
+            border-radius: 8px;
+            padding: 10px 15px;
+          }
+          .form-check-input {
+            width: 1.2em;
+            height: 1.2em;
+          }
+          .form-check-label {
+            display: flex;
+            align-items: center;
+          }
+          .form-check-card {
+            transition: all 0.2s;
+            cursor: pointer;
+          }
+          .form-check-card:hover {
+            border-color: ${theme.primary} !important;
+          }
+        `}
+      </style>
+    </Container>
   );
 };
 
