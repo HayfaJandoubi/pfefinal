@@ -1,16 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   FiWifi, FiAlertCircle, FiTool, FiUser, FiCheckCircle,
   FiCalendar, FiClock, FiActivity, FiBarChart2, FiMapPin
 } from 'react-icons/fi';
-import { Card, Row, Col, Container, Table, Badge, Button } from 'react-bootstrap';
+import { Card, Row, Col, Container, Table, Badge, Button, Pagination } from 'react-bootstrap';
 import { Pie } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-delete L.Icon.Default.prototype._getIconUrl;
+// Fix for default marker icons
+delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
@@ -87,6 +88,9 @@ const managerData = {
     { id: 1, name: "Samir Trabelsi", email: "s.trabelsi@example.com", currentTask: "Site Sousse Nord - Power issue" },
     { id: 2, name: "Leila Boukadi", email: "l.boukadi@example.com", currentTask: "Site Sousse Sud - Antenna repair" },
     { id: 3, name: "Karim Hammami", email: "k.hammami@example.com", currentTask: "Available" },
+    { id: 4, name: "Ahmed Ben Salah", email: "a.bensalah@example.com", currentTask: "Available" },
+    { id: 5, name: "Fatma Ksouri", email: "f.ksouri@example.com", currentTask: "Site Sousse Port - Routine check" },
+    { id: 6, name: "Youssef Ben Amor", email: "y.benamor@example.com", currentTask: "Available" },
   ],
   recentActivities: [
     { id: 1, action: "Maintenance planifiée", site: "Site Sousse Nord", date: "2023-06-14 14:00", status: "completed" },
@@ -97,10 +101,6 @@ const managerData = {
     operational: managerSites.filter(site => site.status === "operational").length,
     maintenance: managerSites.filter(site => site.status === "maintenance").length,
     critical: managerSites.filter(site => site.status === "critical").length
-  },
-  performanceData: {
-    uptime: 99.2,
-    lastMonth: 98.7
   }
 };
 
@@ -143,6 +143,9 @@ const StatCard: React.FC<StatCardProps> = ({ icon, title, value, change, isPosit
 );
 
 const DashboardGest: React.FC = () => {
+  const [techniciansPage, setTechniciansPage] = useState(1);
+  const techniciansPerPage = 4;
+
   const getMarkerColor = (status: string) => {
     switch (status) {
       case 'operational': return theme.success;
@@ -186,6 +189,12 @@ const DashboardGest: React.FC = () => {
       borderWidth: 1,
     }]
   };
+
+  // Get current technicians for pagination
+  const indexOfLastTechnician = techniciansPage * techniciansPerPage;
+  const indexOfFirstTechnician = indexOfLastTechnician - techniciansPerPage;
+  const currentTechnicians = managerData.assignedTechnicians.slice(indexOfFirstTechnician, indexOfLastTechnician);
+  const totalTechnicianPages = Math.ceil(managerData.assignedTechnicians.length / techniciansPerPage);
 
   return (
     <Container fluid className="px-4 py-3" style={{ backgroundColor: '#f8f9fc', minHeight: '100vh' }}>
@@ -234,11 +243,11 @@ const DashboardGest: React.FC = () => {
         </Col>
         <Col xl={3} md={6}>
           <StatCard 
-            icon={<FiClock size={20} />} 
-            title="Disponibilité" 
-            value={`${managerData.performanceData.uptime}%`} 
-            change={`${managerData.performanceData.uptime - managerData.performanceData.lastMonth}% vs mois dernier`} 
-            isPositive={managerData.performanceData.uptime > managerData.performanceData.lastMonth} 
+            icon={<FiUser size={20} />} 
+            title="Techniciens sous gestion" 
+            value={managerData.assignedTechnicians.length.toString()} 
+            change="+2 ce mois" 
+            isPositive={true} 
             color={theme.info}
           />
         </Col>
@@ -386,7 +395,7 @@ const DashboardGest: React.FC = () => {
                 </Card.Header>
                 <Card.Body className="p-0">
                   <div className="list-group list-group-flush">
-                    {managerData.assignedTechnicians.map(tech => (
+                    {currentTechnicians.map(tech => (
                       <div key={tech.id} className="list-group-item border-0 py-3 px-4">
                         <div className="d-flex align-items-center">
                           <div className="rounded-circle d-flex align-items-center justify-content-center me-3" 
@@ -414,6 +423,34 @@ const DashboardGest: React.FC = () => {
                       </div>
                     ))}
                   </div>
+                  <Card.Footer className="bg-white border-top-0 py-2">
+                    <div className="d-flex justify-content-center">
+                      <Pagination className="mb-0">
+                        <Pagination.Prev 
+                          disabled={techniciansPage === 1} 
+                          onClick={() => setTechniciansPage(techniciansPage - 1)} 
+                        />
+                        {Array.from({ length: totalTechnicianPages }, (_, i) => (
+                          <Pagination.Item
+                            key={i + 1}
+                            active={i + 1 === techniciansPage}
+                            onClick={() => setTechniciansPage(i + 1)}
+                            style={{
+                              backgroundColor: i + 1 === techniciansPage ? 'rgba(78, 115, 223, 0.2)' : 'transparent',
+                              color: i + 1 === techniciansPage ? theme.primary : '#6c757d',
+                              borderColor: 'transparent'
+                            }}
+                          >
+                            {i + 1}
+                          </Pagination.Item>
+                        ))}
+                        <Pagination.Next 
+                          disabled={techniciansPage === totalTechnicianPages} 
+                          onClick={() => setTechniciansPage(techniciansPage + 1)} 
+                        />
+                      </Pagination>
+                    </div>
+                  </Card.Footer>
                 </Card.Body>
               </Card>
             </Col>
@@ -548,6 +585,20 @@ const DashboardGest: React.FC = () => {
           }
           .list-group-item:hover {
             background-color: #f8f9fa;
+          }
+          .page-item.active .page-link {
+            background-color: rgba(78, 115, 223, 0.2) !important;
+            border-color: transparent !important;
+            color: ${theme.primary} !important;
+            font-weight: 600;
+          }
+          .page-link {
+            color: #6c757d;
+            border-color: transparent;
+          }
+          .page-link:hover {
+            background-color: rgba(78, 115, 223, 0.1);
+            color: ${theme.primary};
           }
         `}
       </style>

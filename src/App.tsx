@@ -4,7 +4,6 @@ import GestionnaireList from './components/GestionnaireList';
 import TechnicianList from './components/TechnicianList';
 import SiteMobile from './components/SiteMobile';
 import Dashboard from "./components/Dashboard";
-import TechnicianForm from './components/TechnicianForm';
 import GestionnaireForm from './components/GestionnaireForm';
 import SiteEnAttente from './components/SiteEnAttente';
 import LoginPage from './components/LoginPage';
@@ -16,8 +15,10 @@ import SitePanne from './components/SitePanne';
 import DetailsIntervention from './components/DetailsIntervention';
 import RapportIntervention from './components/RapportIntervention';
 import MajEtat from './components/MajEtat';
-import AssignerTech from './components/AssignerTech';
+import AssignerTech from './components/AssignerTech'; 
 import TechDashboard from "./components/TechDashboard";
+import Intervention from './components/Intervention';
+import TechnicianGest from "./components/TechnicianGest";
 import React from "react";
 
 // A wrapper to conditionally show layout
@@ -25,13 +26,16 @@ const AppContent = () => {
   const location = useLocation();
   const isLoginPage = location.pathname === "/login";
 
+  const handleLogin = () => {
+    // Your login logic here
+    // This would typically navigate to another page after successful login
+  };
+
   return (
     <>
       {isLoginPage ? (
         <Routes>
-          <Route path="/login" element={<LoginPage onLogin={function (): void {
-            throw new Error("Function not implemented.");
-          } } />} />
+          <Route path="/login" element={<LoginPage />} />
         </Routes>
       ) : (
         <Layout>
@@ -40,7 +44,6 @@ const AppContent = () => {
             <Route path="/gestionnaires" element={<GestionnaireList />} />
             <Route path="/techniciens" element={<TechnicianList />} />
             <Route path="/sitemobile" element={<SiteMobile />} />
-            <Route path="/technicienform" element={<TechnicianForm />} />
             <Route path="/gestionnaireform" element={<GestionnaireForm />} />
             <Route path="/sitesenattente" element={<SiteEnAttente />} />
             <Route path="/dashboardgest" element={<DashboardGest />} />
@@ -53,6 +56,8 @@ const AppContent = () => {
             <Route path="/majetat" element={<MajEtat />} />
             <Route path="/assigner-technicien" element={<AssignerTech />} />  
             <Route path="/techdashboard" element={<TechDashboard />} />
+            <Route path="/intervention" element={<Intervention />} /> 
+            <Route path="/techniciangest" element={<TechnicianGest />} />
           </Routes>
         </Layout>
       )}

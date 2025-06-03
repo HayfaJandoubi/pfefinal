@@ -7,6 +7,8 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const role = 'technicien'; // 'admin' | 'gestionnaire' | 'technicien'
+
   return (
     <div
       style={{
@@ -28,7 +30,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           overflow: 'auto',
         }}
       >
-        <Sidebar />
+        <Sidebar role={role} />
       </div>
 
       {/* Main content column */}
@@ -50,8 +52,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           style={{
             flex: 1,
             overflow: 'auto',
-            backgroundColor: '#f8f9fa', 
-            padding: '1.5rem',        
+            backgroundColor: '#f8f9fa',
+            padding: '1.5rem',
           }}
         >
           {children}

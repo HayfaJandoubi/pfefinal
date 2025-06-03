@@ -1,6 +1,6 @@
 import React from 'react';
 import { 
-  FiTool, FiClock, FiCheckCircle, FiAlertCircle, FiUser, 
+  FiTool, FiCheckCircle, FiUser, 
   FiCalendar, FiMapPin, FiInfo, FiPlusCircle 
 } from 'react-icons/fi';
 import { Card, Row, Col, Container, Table, Badge, Button, ProgressBar } from 'react-bootstrap';
@@ -10,10 +10,18 @@ const technicienData = {
   nom: "Samir Trabelsi",
   email: "s.trabelsi@example.com",
   specialite: "Réseaux 5G et Fibre",
-  interventions: [
-    { id: 1, site: "Site A", type: "Panne électrique", date: "2023-06-15", statut: "En cours", progression: 65 },
-    { id: 2, site: "Site B", type: "Problème antenne", date: "2023-06-16", statut: "En attente", progression: 0 },
-    { id: 3, site: "Site C", type: "Maintenance préventive", date: "2023-06-17", statut: "Planifiée", progression: 0 },
+  currentIntervention: {
+    id: 1, 
+    site: "Site A", 
+    type: "Panne électrique", 
+    date: "2023-06-15", 
+    statut: "En cours", 
+    progression: 65,
+    details: "Résoudre la panne électrique principale sur le site A"
+  },
+  upcomingInterventions: [
+    { id: 2, site: "Site B", type: "Problème antenne", date: "2023-06-16" },
+    { id: 3, site: "Site C", type: "Maintenance préventive", date: "2023-06-17" },
   ],
   historique: [
     { id: 1, site: "Site X", type: "Remplacement équipement", date: "2023-06-10", statut: "Résolu" },
@@ -22,40 +30,30 @@ const technicienData = {
   ],
   stats: {
     interventionsTerminees: 12,
-    interventionsEnCours: 3,
     tauxReussite: 92,
-    tempsMoyen: "2h45"
   }
 };
 
 const dataStatutInterventions = [
   { name: 'Terminées', value: 12 },
-  { name: 'En cours', value: 3 },
   { name: 'Échouées', value: 1 }
 ];
 
-const COLORS = ['#4ADE80', '#4e73df', '#F87171'];
+const COLORS = ['#4ADE80', '#F87171'];
 
 interface StatCardProps {
   icon: React.ReactNode;
   titre: string;
   valeur: string;
-  evolution?: string;
-  estPositif?: boolean;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ icon, titre, valeur, evolution, estPositif = true }) => (
+const StatCard: React.FC<StatCardProps> = ({ icon, titre, valeur }) => (
   <Card className="shadow-sm h-100" style={{ borderLeft: '4px solid #4e73df' }}>
     <Card.Body className="p-3">
       <div className="d-flex justify-content-between align-items-center">
         <div>
           <h6 className="text-muted mb-1">{titre}</h6>
           <h4 className="mb-0">{valeur}</h4>
-          {evolution && (
-            <small className={estPositif ? "text-success" : "text-danger"}>
-              {evolution}
-            </small>
-          )}
         </div>
         <div className="bg-light rounded-circle d-flex align-items-center justify-content-center" style={{ width: 40, height: 40 }}>
           {icon}
@@ -80,33 +78,73 @@ const DashboardTechnicien: React.FC = () => {
 
       {/* Cartes de statistiques */}
       <Row className="mb-4 g-3">
-        <Col md={6} lg={3}>
+        <Col md={6}>
           <StatCard 
             icon={<FiCheckCircle size={20} color="#4ADE80" />}
             titre="Interventions terminées"
             valeur={technicienData.stats.interventionsTerminees.toString()}
           />
         </Col>
-        <Col md={6} lg={3}>
-          <StatCard 
-            icon={<FiClock size={20} color="#4e73df" />}
-            titre="Interventions en cours"
-            valeur={technicienData.stats.interventionsEnCours.toString()}
-          />
-        </Col>
-        <Col md={6} lg={3}>
+        <Col md={6}>
           <StatCard 
             icon={<FiCheckCircle size={20} color="#1cc88a" />}
             titre="Taux de réussite"
             valeur={`${technicienData.stats.tauxReussite}%`}
           />
         </Col>
-        <Col md={6} lg={3}>
-          <StatCard 
-            icon={<FiClock size={20} color="#f6c23e" />}
-            titre="Temps moyen"
-            valeur={technicienData.stats.tempsMoyen}
-          />
+      </Row>
+
+      {/* Intervention actuelle */}
+      <Row className="mb-4">
+        <Col>
+          <Card className="shadow-sm">
+            <Card.Header className="bg-white border-bottom-0 pb-0">
+              <h5 className="mb-0">
+                <FiTool className="me-2" style={{ color: '#4e73df' }} />
+                Intervention en cours
+              </h5>
+            </Card.Header>
+            <Card.Body>
+              {technicienData.currentIntervention ? (
+                <div>
+                  <div className="d-flex justify-content-between mb-3">
+                    <div>
+                      <h4>{technicienData.currentIntervention.site}</h4>
+                      <p className="text-muted mb-1">{technicienData.currentIntervention.type}</p>
+                      <p className="text-muted">{technicienData.currentIntervention.details}</p>
+                    </div>
+                    <Badge bg="primary" className="align-self-start">
+                      {technicienData.currentIntervention.statut}
+                    </Badge>
+                  </div>
+                  <div className="mb-2">
+                    <strong>Progression:</strong>
+                    <ProgressBar 
+                      now={technicienData.currentIntervention.progression} 
+                      label={`${technicienData.currentIntervention.progression}%`} 
+                      variant="primary"
+                      className="mt-2"
+                    />
+                  </div>
+                  <div className="d-flex justify-content-end">
+                    <Button variant="primary" className="me-2">
+                      Mettre à jour
+                    </Button>
+                    <Button variant="outline-danger">
+                      Signaler problème
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-muted">Aucune intervention en cours</p>
+                  <Button variant="outline-primary">
+                    Voir les interventions disponibles
+                  </Button>
+                </div>
+              )}
+            </Card.Body>
+          </Card>
         </Col>
       </Row>
 
@@ -116,51 +154,35 @@ const DashboardTechnicien: React.FC = () => {
           <Card className="shadow-sm h-100">
             <Card.Header className="bg-white border-bottom-0 pb-0">
               <h5 className="mb-0">
-                <FiTool className="me-2" style={{ color: '#4e73df' }} />
-                Interventions assignées
+                <FiCalendar className="me-2" style={{ color: '#4e73df' }} />
+                Interventions à venir
               </h5>
             </Card.Header>
             <Card.Body>
-              <Table hover responsive className="mb-0">
-                <thead className="bg-light">
-                  <tr>
-                    <th>Site</th>
-                    <th>Type</th>
-                    <th>Date</th>
-                    <th>Statut</th>
-                    <th>Progression</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {technicienData.interventions.map(intervention => (
-                    <tr key={intervention.id}>
-                      <td>{intervention.site}</td>
-                      <td>{intervention.type}</td>
-                      <td>{intervention.date}</td>
-                      <td>
-                        <Badge bg={
-                          intervention.statut === "En cours" ? "primary" :
-                          intervention.statut === "Résolu" ? "success" :
-                          intervention.statut === "En attente" ? "warning" : "secondary"
-                        }>
-                          {intervention.statut}
-                        </Badge>
-                      </td>
-                      <td>
-                        <ProgressBar 
-                          now={intervention.progression} 
-                          label={`${intervention.progression}%`} 
-                          variant={
-                            intervention.statut === "En cours" ? "primary" :
-                            intervention.statut === "Résolu" ? "success" :
-                            intervention.statut === "En attente" ? "warning" : "secondary"
-                          } 
-                        />
-                      </td>
+              {technicienData.upcomingInterventions.length > 0 ? (
+                <Table hover responsive className="mb-0">
+                  <thead className="bg-light">
+                    <tr>
+                      <th>Date</th>
+                      <th>Site</th>
+                      <th>Type</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
+                  </thead>
+                  <tbody>
+                    {technicienData.upcomingInterventions.map(intervention => (
+                      <tr key={intervention.id}>
+                        <td>{intervention.date}</td>
+                        <td>{intervention.site}</td>
+                        <td>{intervention.type}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-muted">Aucune intervention programmée</p>
+                </div>
+              )}
             </Card.Body>
           </Card>
         </Col>
@@ -169,27 +191,27 @@ const DashboardTechnicien: React.FC = () => {
             <Card.Header className="bg-white border-bottom-0 pb-0">
               <h5 className="mb-0">
                 <FiCalendar className="me-2" style={{ color: '#4e73df' }} />
-                Historique des interventions
+                Historique récent
               </h5>
             </Card.Header>
             <Card.Body>
               <Table hover responsive className="mb-0">
                 <thead className="bg-light">
                   <tr>
+                    <th>Date</th>
                     <th>Site</th>
                     <th>Type</th>
-                    <th>Date</th>
                     <th>Statut</th>
                   </tr>
                 </thead>
                 <tbody>
                   {technicienData.historique.map(intervention => (
                     <tr key={intervention.id}>
+                      <td>{intervention.date}</td>
                       <td>{intervention.site}</td>
                       <td>{intervention.type}</td>
-                      <td>{intervention.date}</td>
                       <td>
-                        <Badge bg={intervention.statut === "Résolu" ? "success" : "secondary"}>
+                        <Badge bg="success">
                           {intervention.statut}
                         </Badge>
                       </td>
@@ -202,7 +224,7 @@ const DashboardTechnicien: React.FC = () => {
         </Col>
       </Row>
 
-      {/* Graphique et détails */}
+      {/* Graphique et prochaines interventions */}
       <Row className="g-3">
         <Col lg={5}>
           <Card className="shadow-sm h-100">
@@ -242,53 +264,36 @@ const DashboardTechnicien: React.FC = () => {
             <Card.Header className="bg-white border-bottom-0 pb-0">
               <h5 className="mb-0">
                 <FiMapPin className="me-2" style={{ color: '#4e73df' }} />
-                Prochaines interventions
+                Détails de l'intervention en cours
               </h5>
             </Card.Header>
             <Card.Body>
-              <div className="d-flex flex-column h-100">
-                <div className="mb-3">
-                  <h6 className="text-primary">Aujourd'hui</h6>
-                  <Card className="border-primary mb-2">
-                    <Card.Body className="py-2">
-                      <div className="d-flex justify-content-between">
-                        <div>
-                          <strong>Site A</strong> - Panne électrique
-                        </div>
-                        <Badge bg="primary">En cours (65%)</Badge>
-                      </div>
-                    </Card.Body>
-                  </Card>
-                </div>
-                
-                <div className="mb-3">
-                  <h6 className="text-primary">Demain</h6>
-                  <Card className="border-warning mb-2">
-                    <Card.Body className="py-2">
-                      <div className="d-flex justify-content-between">
-                        <div>
-                          <strong>Site B</strong> - Problème antenne
-                        </div>
-                        <Badge bg="warning">Planifié</Badge>
-                      </div>
-                    </Card.Body>
-                  </Card>
-                </div>
-                
+              {technicienData.currentIntervention ? (
                 <div>
-                  <h6 className="text-primary">17 Juin 2023</h6>
-                  <Card className="border-secondary">
-                    <Card.Body className="py-2">
-                      <div className="d-flex justify-content-between">
-                        <div>
-                          <strong>Site C</strong> - Maintenance préventive
-                        </div>
-                        <Badge bg="secondary">À venir</Badge>
-                      </div>
-                    </Card.Body>
-                  </Card>
+                  <h6 className="text-primary mb-3">Détails techniques</h6>
+                  <div className="mb-3">
+                    <strong>Site:</strong> {technicienData.currentIntervention.site}
+                  </div>
+                  <div className="mb-3">
+                    <strong>Type d'intervention:</strong> {technicienData.currentIntervention.type}
+                  </div>
+                  <div className="mb-3">
+                    <strong>Description:</strong> {technicienData.currentIntervention.details}
+                  </div>
+                  <div className="mb-3">
+                    <strong>Date:</strong> {technicienData.currentIntervention.date}
+                  </div>
+                  <div className="d-flex justify-content-end mt-4">
+                    <Button variant="primary">
+                      Voir les détails complets
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-muted">Aucune intervention en cours</p>
+                </div>
+              )}
             </Card.Body>
           </Card>
         </Col>
