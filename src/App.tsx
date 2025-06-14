@@ -6,7 +6,7 @@ import SiteMobile from './components/SiteMobile';
 import Dashboard from "./components/Dashboard";
 import GestionnaireForm from './components/GestionnaireForm';
 import SiteEnAttente from './components/SiteEnAttente';
-import LoginPage from './components/LoginPage';
+import Login from './components/Login';
 import DashboardGest from "./components/DashboardGest";
 import DashboardTech from "./components/DashboardTech";
 import AjoutSite from './components/AjoutSite';
@@ -35,7 +35,7 @@ const AppContent = () => {
     <>
       {isLoginPage ? (
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       ) : (
         <Layout>

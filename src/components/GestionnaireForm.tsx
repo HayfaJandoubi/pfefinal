@@ -53,12 +53,26 @@ const AjouterUtilisateur = () => {
 
   useEffect(() => {
     if (userToEdit) {
-      const cleanPhone = userToEdit.telephone.replace("+216", "").trim();
-      setFormData({ ...userToEdit, telephone: cleanPhone });
+      // Format the phone number for display (remove any existing formatting)
+      const cleanPhone = userToEdit.telephone.replace(/[^\d]/g, "");
+      let formattedPhone = cleanPhone;
+      if (cleanPhone.length > 2) {
+        formattedPhone = `${cleanPhone.slice(0, 2)} ${cleanPhone.slice(2, 5)}`;
+        if (cleanPhone.length > 5) {
+          formattedPhone += ` ${cleanPhone.slice(5, 8)}`;
+        }
+      }
+      
+      setFormData({ 
+        ...userToEdit, 
+        telephone: formattedPhone,
+        // Ensure password is maintained if it exists, otherwise generate one
+        password: userToEdit.password || generatePassword() 
+      });
     }
   }, [userToEdit]);
 
-const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
 
     if (name === "nom" || name === "prenom") {

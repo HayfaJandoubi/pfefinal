@@ -4,7 +4,6 @@ import { Button, Card, Form, Container, Row, Col, FormCheck, Image, FloatingLabe
 import { FiUser, FiLock, FiLogIn, FiShield, FiGlobe, FiSettings, FiTool } from 'react-icons/fi';
 import Swal from 'sweetalert2';
 
-// Type-safe CSS properties
 const styles = {
   container: {
     minHeight: '100vh',

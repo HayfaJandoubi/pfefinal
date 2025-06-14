@@ -93,7 +93,6 @@ const SiteGest: React.FC = () => {
     previousDataRef.current = [...data];
   }, [data]);
 
-  // Calculate statistics
   const totalSites = data.length;
   const operationalSites = data.filter(site => site.etat === "Opérationnel").length;
   const downSites = data.filter(site => site.etat === "En panne").length;

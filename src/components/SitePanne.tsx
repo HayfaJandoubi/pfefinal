@@ -12,6 +12,10 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Button, Container, Badge, Card, Row, Col, Dropdown } from "react-bootstrap";
 import { FiDownload, FiPlus, FiWifi, FiAlertTriangle, FiCheckCircle, FiMapPin, FiUser, FiInfo } from "react-icons/fi";
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 const theme = {
   primary: "#3f51b5",
@@ -44,6 +48,7 @@ const SitePanne: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const previousDataRef = useRef<SitePanne[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [hasShownAlert, setHasShownAlert] = useState(false);
 
   useEffect(() => {
     const fetchSitesPanne = async () => {
@@ -90,6 +95,12 @@ const SitePanne: React.FC = () => {
 
         setData(filteredSites);
         setLoading(false);
+
+        // Show alert if there are unresolved issues and alert hasn't been shown yet
+        if (!hasShownAlert && filteredSites.some(site => site.etat === "Non résolue")) {
+          showAlert(filteredSites.filter(site => site.etat === "Non résolue").length);
+          setHasShownAlert(true);
+        }
       } catch (error) {
         console.error('Erreur lors du chargement des sites en panne:', error);
         setLoading(false);
@@ -97,7 +108,61 @@ const SitePanne: React.FC = () => {
     };
 
     fetchSitesPanne();
-  }, []);
+  }, [hasShownAlert]);
+
+  const showAlert = (unresolvedCount: number) => {
+    MySwal.fire({
+      title: <strong style={{ fontSize: '24px' }}>Alerte Panne!</strong>,
+      html: `<div style="font-size: 16px">
+              <p>Il y a <strong style="color: ${theme.danger}">${unresolvedCount} site(s)</strong> en panne non résolue(s) qui nécessite(nt) votre attention.</p>
+              <p style="margin-top: 10px">Veuillez assigner un technicien dès que possible.</p>
+            </div>`,
+      icon: 'error',
+      iconColor: theme.danger,
+      background: theme.card,
+      backdrop: `
+        rgba(220,53,69,0.4)
+        url("/images/nyan-cat.gif")
+        left top
+        no-repeat
+      `,
+      showConfirmButton: true,
+      confirmButtonText: 'Compris',
+      confirmButtonColor: theme.danger,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      allowEnterKey: true,
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown animate__faster'
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp animate__faster'
+      },
+      customClass: {
+        popup: 'border-danger',
+        title: 'text-danger',
+        confirmButton: 'btn-danger'
+      },
+      buttonsStyling: true,
+      timerProgressBar: true,
+      didOpen: () => {
+        // Add flashing effect
+        const popup = Swal.getPopup();
+        if (popup) {
+          let flashCount = 0;
+          const maxFlashes = 6;
+          const flashInterval = setInterval(() => {
+            popup.style.border = flashCount % 2 === 0 ? `4px solid ${theme.danger}` : '4px solid transparent';
+            flashCount++;
+            if (flashCount >= maxFlashes * 2) {
+              clearInterval(flashInterval);
+              popup.style.border = `4px solid ${theme.danger}`;
+            }
+          }, 200);
+        }
+      }
+    });
+  };
 
   useEffect(() => {
     previousDataRef.current = [...data];

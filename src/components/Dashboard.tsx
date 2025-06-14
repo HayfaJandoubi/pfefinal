@@ -219,9 +219,6 @@ const Dashboard: React.FC = () => {
       <div className="d-flex justify-content-between align-items-center mb-4 pt-3">
         <div>
           <h2 className="mb-1 fw-bold" style={{ color: theme.dark }}>Tableau de Bord Administrateur</h2>
-          <h5 className="text-muted">
-            Connecté en tant que: <span style={{ color: theme.primary }}>{nomAdmin}</span>
-          </h5>
         </div>
       </div>
 

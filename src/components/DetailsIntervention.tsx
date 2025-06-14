@@ -1,8 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Button, Card, Container, Row, Col, Badge, ListGroup, ProgressBar } from "react-bootstrap";
-import { FiArrowLeft, FiClock, FiUser, FiAlertCircle, FiCheckCircle, FiCalendar, FiTool, FiFileText } from "react-icons/fi";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
+import { Button, Card, Container, Row, Col, Badge, ListGroup, ProgressBar, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { FiArrowLeft, FiClock, FiUser, FiAlertCircle, FiCheckCircle, FiCalendar, FiTool, FiFileText, FiBell } from "react-icons/fi";
 
 const theme = {
   primary: "#3f51b5",
@@ -26,15 +24,17 @@ interface InterventionDetails {
   dateDeclaration: string;
   dateIntervention: string;
   technicien: string;
+  gestionnaire: string;
   etat: "Non résolue" | "En cours" | "Résolue";
   descriptionPanne: string;
   actionsRealisees: string;
   materielUtilise: string;
   dureeIntervention: string;
   notesComplementaires?: string;
+  rapport?: string;
 }
 
-const DetailsIntervention = () => {
+const DetailsInterventionGestionnaire = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const intervention: InterventionDetails = state?.intervention || {
@@ -46,12 +46,13 @@ const DetailsIntervention = () => {
     dateDeclaration: "2023-05-15 09:30",
     dateIntervention: "2023-05-16 14:00",
     technicien: "Mohamed Ali",
-    etat: "En cours",
+    gestionnaire: "Nidhal Ghariani",
+    etat: "Non résolue",
     descriptionPanne: "Perte intermittente du signal réseau dans la zone nord du site",
-    actionsRealisees: "Vérification des équipements, diagnostic du problème",
-    materielUtilise: "Analyseur de spectre, multimètre",
-    dureeIntervention: "2 heures",
-    notesComplementaires: "Nécessite un remplacement de la carte réseau"
+    actionsRealisees: "",
+    materielUtilise: "",
+    dureeIntervention: "",
+    notesComplementaires: ""
   };
 
   const getEtatBadge = () => {
@@ -80,96 +81,15 @@ const DetailsIntervention = () => {
     }
   };
 
-  const handleUpdateStatus = () => {
-    navigate("/majetat", { state: { intervention } });
+  const handleSendReminder = () => {
+    alert(`Rappel envoyé au technicien ${intervention.technicien}`);
+    // In a real app, you would send this to the backend
   };
 
-  const handleGenerateReport = () => {
-    const doc = new jsPDF();
-    
-    // Add logo and header
-    doc.setFontSize(18);
-    doc.setTextColor(theme.primary);
-    doc.text("Rapport d'Intervention Technique", 105, 20, { align: 'center' });
-    
-    doc.setFontSize(12);
-    doc.setTextColor(theme.dark);
-    doc.text(`Intervention #${intervention.id} - ${intervention.nomSite}`, 105, 30, { align: 'center' });
-    
-    // Add date
-    doc.setFontSize(10);
-    doc.setTextColor(theme.secondary);
-    doc.text(`Généré le: ${new Date().toLocaleDateString()}`, 105, 36, { align: 'center' });
-    
-    // Add horizontal line
-    doc.setDrawColor(theme.primary);
-    doc.setLineWidth(0.5);
-    doc.line(20, 40, 190, 40);
-    
-    // Basic information table
-    autoTable(doc, {
-      startY: 45,
-      head: [['Informations Générales', '']],
-      body: [
-        ['Site', intervention.nomSite],
-        ['Adresse', intervention.adresse],
-        ['Coordonnées', intervention.coordonnees],
-        ['Type de panne', intervention.typePanne],
-        ['Date déclaration', intervention.dateDeclaration],
-        ['Date intervention', intervention.dateIntervention],
-        ['Technicien', intervention.technicien],
-        ['État', intervention.etat],
-        ['Durée intervention', intervention.dureeIntervention]
-      ],
-      theme: 'grid',
-      headStyles: {
-        fillColor: theme.primary,
-        textColor: 255,
-        fontStyle: 'bold'
-      },
-      columnStyles: {
-        0: { fontStyle: 'bold', cellWidth: 60 },
-        1: { cellWidth: 'auto' }
-      }
-    });
-    
-    // Technical details
-    autoTable(doc, {
-      startY: (doc as any).lastAutoTable.finalY + 10,
-      head: [['Détails Techniques', '']],
-      body: [
-        ['Description de la panne', intervention.descriptionPanne],
-        ['Actions réalisées', intervention.actionsRealisees],
-        ['Matériel utilisé', intervention.materielUtilise],
-        ['Notes complémentaires', intervention.notesComplementaires || 'Aucune']
-      ],
-      theme: 'grid',
-      headStyles: {
-        fillColor: theme.primary,
-        textColor: 255,
-        fontStyle: 'bold'
-      },
-      columnStyles: {
-        0: { fontStyle: 'bold', cellWidth: 60 },
-        1: { cellWidth: 'auto' }
-      },
-      styles: {
-        minCellHeight: 20,
-        valign: 'top'
-      }
-    });
-    
-    // Footer
-    const pageCount = doc.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setFontSize(8);
-      doc.setTextColor(theme.secondary);
-      doc.text(`Page ${i} sur ${pageCount}`, 105, 285, { align: 'center' });
-      doc.text("© Société Telecom - Tous droits réservés", 105, 290, { align: 'center' });
+  const handleViewReport = () => {
+    if (intervention.rapport) {
+      navigate("/voir-rapport", { state: { intervention } });
     }
-    
-    doc.save(`rapport_intervention_${intervention.id}.pdf`);
   };
 
   return (
@@ -263,7 +183,7 @@ const DetailsIntervention = () => {
           <Card className="border-0 shadow-sm h-100">
             <Card.Header className="bg-white border-0">
               <h5 className="mb-0 fw-bold">
-                <FiCalendar className="me-2" /> Dates et responsable
+                <FiCalendar className="me-2" /> Dates et responsables
               </h5>
             </Card.Header>
             <Card.Body>
@@ -278,13 +198,34 @@ const DetailsIntervention = () => {
                 </ListGroup.Item>
                 <ListGroup.Item className="d-flex justify-content-between align-items-center">
                   <span className="fw-bold">Durée intervention:</span>
-                  <span>{intervention.dureeIntervention}</span>
+                  <span>{intervention.dureeIntervention || "Non spécifiée"}</span>
                 </ListGroup.Item>
                 <ListGroup.Item className="d-flex justify-content-between align-items-center">
                   <span className="fw-bold">Technicien:</span>
                   <span className="d-flex align-items-center">
                     <FiUser className="me-2" />
                     {intervention.technicien}
+                    {intervention.etat === "Non résolue" && (
+                      <OverlayTrigger
+                        placement="top"
+                        overlay={<Tooltip>Envoyer un rappel au technicien</Tooltip>}
+                      >
+                        <Button 
+                          variant="link" 
+                          className="p-0 ms-2"
+                          onClick={handleSendReminder}
+                        >
+                          <FiBell className="text-warning" />
+                        </Button>
+                      </OverlayTrigger>
+                    )}
+                  </span>
+                </ListGroup.Item>
+                <ListGroup.Item className="d-flex justify-content-between align-items-center">
+                  <span className="fw-bold">Gestionnaire:</span>
+                  <span className="d-flex align-items-center">
+                    <FiUser className="me-2" />
+                    {intervention.gestionnaire}
                   </span>
                 </ListGroup.Item>
               </ListGroup>
@@ -310,13 +251,13 @@ const DetailsIntervention = () => {
                 </Col>
                 <Col md={6}>
                   <h6 className="fw-bold mb-3">Actions réalisées:</h6>
-                  <p className="text-muted">{intervention.actionsRealisees}</p>
+                  <p className="text-muted">{intervention.actionsRealisees || "Aucune action enregistrée"}</p>
                 </Col>
               </Row>
               <Row className="mt-3">
                 <Col md={6}>
                   <h6 className="fw-bold mb-3">Matériel utilisé:</h6>
-                  <p className="text-muted">{intervention.materielUtilise}</p>
+                  <p className="text-muted">{intervention.materielUtilise || "Aucun matériel spécifié"}</p>
                 </Col>
                 <Col md={6}>
                   <h6 className="fw-bold mb-3">Notes complémentaires:</h6>
@@ -330,32 +271,45 @@ const DetailsIntervention = () => {
         </Col>
       </Row>
 
+      {/* Rapport Section */}
+      {intervention.etat === "Résolue" && intervention.rapport && (
+        <Row className="mb-4">
+          <Col>
+            <Card className="border-0 shadow-sm">
+              <Card.Header className="bg-white border-0">
+                <h5 className="mb-0 fw-bold">
+                  <FiFileText className="me-2" /> Rapport du technicien
+                </h5>
+              </Card.Header>
+              <Card.Body>
+                <p className="text-muted">{intervention.rapport}</p>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      )}
+
       {/* Action Buttons */}
       <Row className="mb-4">
         <Col className="d-flex justify-content-end gap-3">
           {intervention.etat === "Non résolue" && (
-            <Button variant="danger" className="d-flex align-items-center">
+            <Button 
+              variant="danger" 
+              className="d-flex align-items-center"
+              onClick={() => navigate("/assigner-technicien", { state: { intervention } })}
+            >
               <FiAlertCircle className="me-2" />
               Réaffecter un technicien
             </Button>
           )}
-          {intervention.etat === "En cours" && (
-            <Button 
-              variant="warning" 
-              className="d-flex align-items-center"
-              onClick={handleUpdateStatus}
-            >
-              <FiClock className="me-2" />
-              Mettre à jour l'état
-            </Button>
-          )}
           <Button 
-            variant="primary" 
+            variant={intervention.etat === "Résolue" ? "primary" : "outline-secondary"} 
             className="d-flex align-items-center" 
-            onClick={handleGenerateReport}
+            onClick={handleViewReport}
+            disabled={intervention.etat !== "Résolue"}
           >
             <FiFileText className="me-2" />
-            Générer un rapport
+            {intervention.etat === "Résolue" ? "Voir le rapport" : "Aucun rapport disponible"}
           </Button>
         </Col>
       </Row>
@@ -381,4 +335,4 @@ const DetailsIntervention = () => {
   );
 };
 
-export default DetailsIntervention;
+export default DetailsInterventionGestionnaire;
